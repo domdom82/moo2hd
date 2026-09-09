@@ -1,0 +1,514 @@
+techs:
+  # Technology tree for MOO2 / patch 1.50.
+  # Each of the 8 research fields has ~10 levels of techs.
+  # level: approximate research order within the field (1=earliest).
+  # cost:  research points required.
+  # Creative races research ALL options in a field; others pick one per level.
+
+  # ── PHYSICS ────────────────────────────────────────────────────────────────
+  - id: nuclear_fission
+    name: Nuclear Fission
+    category: physics
+    level: 1
+    cost: 80
+    description: Basic nuclear energy; enables first-generation drives.
+    unlocks: [nuclear_drive, nuclear_bomb]
+
+  - id: fusion_physics
+    name: Fusion Physics
+    category: physics
+    level: 2
+    cost: 250
+    prereqs: [nuclear_fission]
+    unlocks: [fusion_drive, fusion_bomb]
+
+  - id: tachyon_physics
+    name: Tachyon Physics
+    category: physics
+    level: 3
+    cost: 600
+    prereqs: [fusion_physics]
+    unlocks: [hyperspace_comm, tachyon_scanner]
+
+  - id: quantum_mechanics
+    name: Quantum Mechanics
+    category: physics
+    level: 4
+    cost: 1200
+    prereqs: [tachyon_physics]
+    unlocks: [quantum_detonator, quantum_cloaking]
+
+  - id: molecular_compression
+    name: Molecular Compression
+    category: physics
+    level: 5
+    cost: 2500
+    prereqs: [quantum_mechanics]
+    unlocks: [molecularbreaker, stellar_converter]
+
+  # ── COMPUTERS ──────────────────────────────────────────────────────────────
+  - id: electronic_computer
+    name: Electronic Computer
+    category: computers
+    level: 1
+    cost: 80
+    unlocks: [electronic_scanner, research_lab]
+
+  - id: optronic_computer
+    name: Optronic Computer
+    category: computers
+    level: 2
+    cost: 250
+    prereqs: [electronic_computer]
+    unlocks: [optronic_scanner, neural_scanner]
+
+  - id: positronic_computer
+    name: Positronic Computer
+    category: computers
+    level: 3
+    cost: 600
+    prereqs: [optronic_computer]
+    unlocks: [positronic_scanner, advanced_damage_control]
+
+  - id: cybertron_computer
+    name: Cybertron Computer
+    category: computers
+    level: 4
+    cost: 1200
+    prereqs: [positronic_computer]
+    unlocks: [cybertron_scanner, automated_repair]
+
+  - id: molecutronic_computer
+    name: Molecutronic Computer
+    category: computers
+    level: 5
+    cost: 2500
+    prereqs: [cybertron_computer]
+    unlocks: [molecutronic_scanner, battle_computer_vi]
+
+  # ── CONSTRUCTION ───────────────────────────────────────────────────────────
+  - id: reinforced_hull
+    name: Reinforced Hull
+    category: construction
+    level: 1
+    cost: 80
+    description: Strengthens ship structure; reduces hull damage.
+    unlocks: [titanium_armor, deep_core_mining]
+
+  - id: titanium_armor
+    name: Titanium Armor
+    category: construction
+    level: 2
+    cost: 150
+    prereqs: [reinforced_hull]
+    unlocks: [duralloy_armor]
+
+  - id: duralloy_armor
+    name: Duralloy Armor
+    category: construction
+    level: 3
+    cost: 250
+    prereqs: [titanium_armor]
+    unlocks: [automated_factory]
+
+  - id: zortrium_armor
+    name: Zortrium Armor
+    category: construction
+    level: 4
+    cost: 600
+    prereqs: [duralloy_armor]
+    unlocks: [robo_miners, android_workers]
+
+  - id: neutronium_armor
+    name: Neutronium Armor
+    category: construction
+    level: 5
+    cost: 1200
+    prereqs: [zortrium_armor]
+
+  - id: adamantium_armor
+    name: Adamantium Armor
+    category: construction
+    level: 6
+    cost: 2500
+    prereqs: [neutronium_armor]
+
+  - id: tritanium_armor
+    name: Tritanium Armor
+    category: construction
+    level: 7
+    cost: 4000
+    prereqs: [adamantium_armor]
+    unlocks: [uridium_armor]
+
+  - id: uridium_armor
+    name: Uridium Armor
+    category: construction
+    level: 8
+    cost: 7500
+    prereqs: [tritanium_armor]
+
+  # ── FORCE FIELDS ───────────────────────────────────────────────────────────
+  - id: class_i_shield
+    name: Class I Shield
+    category: force_fields
+    level: 1
+    cost: 80
+    description: Basic deflector screen.
+    unlocks: [planetary_shield_v]
+
+  - id: class_iii_shield
+    name: Class III Shield
+    category: force_fields
+    level: 2
+    cost: 250
+    prereqs: [class_i_shield]
+
+  - id: class_v_shield
+    name: Class V Shield
+    category: force_fields
+    level: 3
+    cost: 600
+    prereqs: [class_iii_shield]
+    unlocks: [repulsor_beam, lightning_field]
+
+  - id: class_vii_shield
+    name: Class VII Shield
+    category: force_fields
+    level: 4
+    cost: 1200
+    prereqs: [class_v_shield]
+    unlocks: [black_hole_generator]
+
+  - id: class_x_shield
+    name: Class X Shield
+    category: force_fields
+    level: 5
+    cost: 2500
+    prereqs: [class_vii_shield]
+
+  - id: class_xv_shield
+    name: Class XV Shield
+    category: force_fields
+    level: 6
+    cost: 5000
+    prereqs: [class_x_shield]
+
+  - id: class_xx_shield
+    name: Class XX Shield
+    category: force_fields
+    level: 7
+    cost: 10000
+    prereqs: [class_xv_shield]
+
+  # ── PROPULSION ─────────────────────────────────────────────────────────────
+  - id: nuclear_drive
+    name: Nuclear Drive
+    category: propulsion
+    level: 1
+    cost: 100
+    prereqs: [nuclear_fission]
+    unlocks: [fusion_drive]
+
+  - id: fusion_drive
+    name: Fusion Drive
+    category: propulsion
+    level: 2
+    cost: 250
+    prereqs: [nuclear_drive, fusion_physics]
+    unlocks: [ion_drive]
+
+  - id: ion_drive
+    name: Ion Drive
+    category: propulsion
+    level: 3
+    cost: 600
+    prereqs: [fusion_drive]
+    unlocks: [anti_matter_drive]
+
+  - id: anti_matter_drive
+    name: Anti-Matter Drive
+    category: propulsion
+    level: 4
+    cost: 1500
+    prereqs: [ion_drive]
+    unlocks: [hyper_drive]
+
+  - id: hyper_drive
+    name: Hyper Drive
+    category: propulsion
+    level: 5
+    cost: 4000
+    prereqs: [anti_matter_drive]
+    unlocks: [interphased_drive]
+
+  - id: interphased_drive
+    name: Interphased Drive
+    category: propulsion
+    level: 6
+    cost: 9000
+    prereqs: [hyper_drive]
+
+  - id: inertial_stabilizer
+    name: Inertial Stabilizer
+    category: propulsion
+    level: 2
+    cost: 400
+    description: Reduces weapon miss chance due to ship movement.
+
+  - id: inertial_nullifier
+    name: Inertial Nullifier
+    category: propulsion
+    level: 4
+    cost: 1500
+    prereqs: [inertial_stabilizer]
+    description: Eliminates movement penalties entirely.
+
+  # ── WEAPONS ────────────────────────────────────────────────────────────────
+  - id: laser_cannon
+    name: Laser Cannon
+    category: weapons
+    level: 1
+    cost: 60
+    description: Basic directed-energy weapon. 1–4 damage.
+    unlocks: [gauss_cannon, ion_cannon, anti_matter_bomb]
+
+  - id: nuclear_bomb
+    name: Nuclear Bomb
+    category: weapons
+    level: 1
+    cost: 80
+    prereqs: [nuclear_fission]
+    description: Planetary bombardment weapon.
+
+  - id: gauss_cannon
+    name: Gauss Cannon
+    category: weapons
+    level: 2
+    cost: 200
+    prereqs: [laser_cannon]
+    description: Kinetic projectile weapon. 4–8 damage.
+    unlocks: [mass_driver, neutron_blaster]
+
+  - id: ion_cannon
+    name: Ion Cannon
+    category: weapons
+    level: 2
+    cost: 300
+    prereqs: [laser_cannon]
+    description: Bypasses shields. 8 damage.
+
+  - id: fusion_bomb
+    name: Fusion Bomb
+    category: weapons
+    level: 2
+    cost: 300
+    prereqs: [fusion_physics]
+    description: Enhanced bombardment weapon.
+
+  - id: mass_driver
+    name: Mass Driver
+    category: weapons
+    level: 3
+    cost: 600
+    prereqs: [gauss_cannon]
+    description: Magnetically accelerated projectile. 6–10 damage.
+
+  - id: neutron_blaster
+    name: Neutron Blaster
+    category: weapons
+    level: 3
+    cost: 600
+    prereqs: [gauss_cannon]
+    description: Kills crew without destroying ship structure.
+
+  - id: phasors
+    name: Phasors
+    category: weapons
+    level: 3
+    cost: 700
+    prereqs: [gauss_cannon]
+    description: Phased energy weapon. 5–20 damage.
+    unlocks: [tachyon_beam]
+
+  - id: tachyon_beam
+    name: Tachyon Beam
+    category: weapons
+    level: 4
+    cost: 1500
+    prereqs: [phasors, tachyon_physics]
+    description: Faster-than-light beam; penetrates ECM. 1–15 damage.
+
+  - id: graviton_beam
+    name: Graviton Beam
+    category: weapons
+    level: 4
+    cost: 1500
+    prereqs: [phasors]
+    description: Gravitational disruption weapon. 1–10 damage.
+
+  - id: particle_beam
+    name: Particle Beam
+    category: weapons
+    level: 4
+    cost: 1500
+    prereqs: [phasors]
+    description: Anti-matter stream weapon. 2–16 damage.
+
+  - id: plasma_cannon
+    name: Plasma Cannon
+    category: weapons
+    level: 5
+    cost: 3000
+    prereqs: [tachyon_beam]
+    description: Superheated plasma bolt. 6–30 damage.
+
+  - id: disruptor
+    name: Disruptor
+    category: weapons
+    level: 5
+    cost: 3500
+    prereqs: [plasma_cannon]
+    description: Disrupts molecular bonds. 20–50 damage.
+
+  - id: mauler_device
+    name: Mauler Device
+    category: weapons
+    level: 5
+    cost: 5000
+    prereqs: [disruptor]
+    description: Massive short-range weapon. 20–100 damage.
+
+  - id: death_ray
+    name: Death Ray
+    category: weapons
+    level: 7
+    cost: 12000
+    prereqs: [mauler_device]
+    description: Instant destruction weapon.
+
+  - id: stellar_converter
+    name: Stellar Converter
+    category: weapons
+    level: 8
+    cost: 25000
+    prereqs: [death_ray, molecular_compression]
+    description: Converts a star system to an asteroid field.
+
+  # ── BIOLOGY ────────────────────────────────────────────────────────────────
+  - id: biospheres
+    name: Biospheres
+    category: biology
+    level: 1
+    cost: 100
+    description: Enables environmental engineering; unlocks terraforming.
+    unlocks: [terraforming, cloning_center]
+
+  - id: terraforming
+    name: Terraforming
+    category: biology
+    level: 2
+    cost: 400
+    prereqs: [biospheres]
+    description: Improves planet class and max population.
+    unlocks: [advanced_terraforming, gaia_transformation]
+
+  - id: advanced_terraforming
+    name: Advanced Terraforming
+    category: biology
+    level: 3
+    cost: 1200
+    prereqs: [terraforming]
+
+  - id: gaia_transformation
+    name: Gaia Transformation
+    category: biology
+    level: 4
+    cost: 4000
+    prereqs: [advanced_terraforming]
+    description: Transforms any world to Gaia class; maximum population.
+
+  - id: cloning_center
+    name: Cloning Center
+    category: biology
+    level: 2
+    cost: 400
+    prereqs: [biospheres]
+    description: Doubles population growth rate.
+
+  - id: evolutionary_mutation
+    name: Evolutionary Mutation
+    category: biology
+    level: 5
+    cost: 8000
+    prereqs: [gaia_transformation]
+    description: Improves racial stats.
+
+  # ── CHEMISTRY ──────────────────────────────────────────────────────────────
+  - id: chemical_explosives
+    name: Chemical Explosives
+    category: chemistry
+    level: 1
+    cost: 60
+    description: Basic explosives for ground combat and mining.
+
+  - id: deuterium_fuel_cells
+    name: Deuterium Fuel Cells
+    category: chemistry
+    level: 2
+    cost: 250
+    prereqs: [chemical_explosives]
+    description: Extended fuel range; colonize distant systems.
+
+  - id: iridium_fuel_cells
+    name: Iridium Fuel Cells
+    category: chemistry
+    level: 3
+    cost: 800
+    prereqs: [deuterium_fuel_cells]
+
+  - id: uridium_fuel_cells
+    name: Uridium Fuel Cells
+    category: chemistry
+    level: 4
+    cost: 2000
+    prereqs: [iridium_fuel_cells]
+
+  - id: adamantium_fuel_cells
+    name: Adamantium Fuel Cells
+    category: chemistry
+    level: 5
+    cost: 5000
+    prereqs: [uridium_fuel_cells]
+
+  # ── SOCIOLOGY ──────────────────────────────────────────────────────────────
+  - id: alien_management_center
+    name: Alien Management Center
+    category: sociology
+    level: 1
+    cost: 100
+    description: Halves assimilation time for captured colonies.
+
+  - id: xeno_relations
+    name: Xeno Relations
+    category: sociology
+    level: 2
+    cost: 300
+    prereqs: [alien_management_center]
+    description: Improves diplomatic relations with all races.
+
+  - id: galactic_cybernet
+    name: Galactic Cybernet
+    category: sociology
+    level: 3
+    cost: 800
+    prereqs: [xeno_relations]
+    description: Trade network; passive income bonus.
+
+  - id: virtual_reality_network
+    name: Virtual Reality Network
+    category: sociology
+    level: 4
+    cost: 2000
+    prereqs: [galactic_cybernet]
+    description: Massive morale and production bonus for all colonies.

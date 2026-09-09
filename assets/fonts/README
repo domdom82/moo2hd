@@ -1,0 +1,8 @@
+Place a TrueType font file here named DejaVuSans.ttf (or any .ttf).
+The game will load it for star system name labels at Close zoom.
+
+If no font file is present, system names fall back to SDL3's built-in
+8x8 bitmap debug font automatically — no action is required.
+
+DejaVu Sans is freely available at https://dejavu-fonts.github.io/
+(Bitstream Vera Fonts Copyright, no restrictions on redistribution).

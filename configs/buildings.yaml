@@ -1,0 +1,337 @@
+buildings:
+  # Colony structures from MOO2 / patch 1.50.
+  # cost: production points (BC) to build.
+  # maintenance: BC per turn upkeep.
+  # effects: multipliers/flat bonuses applied to the colony.
+
+  # ── BASE INFRASTRUCTURE ────────────────────────────────────────────────────
+  - id: colony_base
+    name: Colony Base
+    cost: 0
+    maintenance: 0
+    description: Initial installation; present on all new colonies.
+    effects:
+      max_pop: 2
+
+  - id: housing
+    name: Housing
+    cost: 60
+    maintenance: 0
+    description: Extra residential blocks increase population cap.
+    effects:
+      max_pop: 2
+      morale: 0.05
+
+  - id: biospheres
+    name: Biospheres
+    cost: 120
+    maintenance: 3
+    prereqs: [biospheres]
+    description: Environmental domes raise maximum population.
+    effects:
+      max_pop: 2
+
+  # ── FOOD ───────────────────────────────────────────────────────────────────
+  - id: hydroponic_farm
+    name: Hydroponic Farm
+    cost: 60
+    maintenance: 2
+    description: Controlled-environment agriculture; each adds +2 food/turn.
+    effects:
+      food: 0.25
+
+  - id: subterranean_farms
+    name: Subterranean Farms
+    cost: 150
+    maintenance: 4
+    prereqs: [terraforming]
+    description: Underground hydroponic network; +4 food/turn.
+    effects:
+      food: 0.5
+
+  - id: cloning_center
+    name: Cloning Center
+    cost: 150
+    maintenance: 4
+    prereqs: [cloning_center]
+    description: Doubles natural population growth rate.
+    effects:
+      pop_growth: 2.0
+
+  # ── PRODUCTION ─────────────────────────────────────────────────────────────
+  - id: automated_factory
+    name: Automated Factory
+    cost: 60
+    maintenance: 2
+    description: Robotics increase industrial output; +5 production/turn.
+    effects:
+      production: 0.1
+
+  - id: robo_miners
+    name: Robo-Miners
+    cost: 120
+    maintenance: 3
+    prereqs: [zortrium_armor]
+    description: Automated mining rigs; +10 production/turn.
+    effects:
+      production: 0.2
+
+  - id: deep_core_mine
+    name: Deep Core Mine
+    cost: 250
+    maintenance: 5
+    prereqs: [reinforced_hull]
+    description: Extracts maximum richness from the planetary crust.
+    effects:
+      production: 0.3
+
+  - id: android_workers
+    name: Android Workers
+    cost: 200
+    maintenance: 4
+    prereqs: [zortrium_armor]
+    description: Non-biological workers increase output without consuming food.
+    effects:
+      production: 0.25
+
+  - id: recyclotron
+    name: Recyclotron
+    cost: 100
+    maintenance: 0
+    description: Eliminates industrial waste; reduces pollution.
+
+  # ── RESEARCH ───────────────────────────────────────────────────────────────
+  - id: research_lab
+    name: Research Lab
+    cost: 75
+    maintenance: 3
+    prereqs: [electronic_computer]
+    description: Basic scientific facility; +5 research/turn.
+    effects:
+      research: 0.1
+
+  - id: computer_lab
+    name: Computer Lab
+    cost: 120
+    maintenance: 4
+    prereqs: [optronic_computer]
+    description: Advanced data processing; +10 research/turn.
+    effects:
+      research: 0.15
+
+  - id: research_center
+    name: Research Center
+    cost: 200
+    maintenance: 5
+    prereqs: [positronic_computer]
+    description: Full scientific complex; +15 research/turn.
+    effects:
+      research: 0.2
+
+  - id: supercomputer
+    name: Supercomputer
+    cost: 300
+    maintenance: 8
+    prereqs: [cybertron_computer]
+    description: Cutting-edge AI research aid; +20 research/turn.
+    effects:
+      research: 0.25
+
+  - id: galactic_cybernet_building
+    name: Galactic Cybernet
+    cost: 400
+    maintenance: 10
+    prereqs: [galactic_cybernet]
+    description: Taps the interstellar knowledge network.
+    effects:
+      research: 0.3
+
+  # ── FINANCE ────────────────────────────────────────────────────────────────
+  - id: spaceport
+    name: Spaceport
+    cost: 80
+    maintenance: 2
+    description: Trade hub; adds +25% trade income and ship construction speed.
+    effects:
+      production: 0.05
+
+  - id: stock_exchange
+    name: Stock Exchange
+    cost: 150
+    maintenance: 5
+    description: Financial market; +30% taxable income.
+    effects:
+      morale: 0.1
+
+  - id: galactic_tycoon
+    name: Galactic Tycoon
+    cost: 300
+    maintenance: 8
+    prereqs: [stock_exchange]
+    description: Interstellar trade empire; massive income bonus.
+    effects:
+      morale: 0.2
+
+  # ── MORALE ─────────────────────────────────────────────────────────────────
+  - id: entertainment_center
+    name: Entertainment Center
+    cost: 60
+    maintenance: 2
+    description: Boosts morale; citizens are happier and more productive.
+    effects:
+      morale: 0.2
+
+  - id: holonet
+    name: Holonet
+    cost: 200
+    maintenance: 5
+    prereqs: [virtual_reality_network]
+    description: Virtual reality entertainment; massive morale boost.
+    effects:
+      morale: 0.5
+
+  - id: temple_of_orion
+    name: Temple of Orion
+    cost: 500
+    maintenance: 0
+    description: Sacred relic of the Orions; raises morale empire-wide.
+    effects:
+      morale: 0.5
+
+  # ── MILITARY / DEFENSE ─────────────────────────────────────────────────────
+  - id: barracks
+    name: Barracks
+    cost: 60
+    maintenance: 2
+    description: Military training; prevents morale penalty for feudal/dictatorships.
+    effects:
+      defense: 1.0
+
+  - id: missile_base
+    name: Missile Base
+    cost: 100
+    maintenance: 3
+    description: Planetary defense installation; provides space combat support.
+    effects:
+      defense: 5.0
+
+  - id: fighter_garrison
+    name: Fighter Garrison
+    cost: 120
+    maintenance: 4
+    description: Orbital fighter patrols defend against bombardment.
+    effects:
+      defense: 8.0
+
+  - id: ground_battery
+    name: Ground Battery
+    cost: 150
+    maintenance: 5
+    description: Anti-ship planetary guns.
+    effects:
+      defense: 10.0
+
+  - id: planetary_shield
+    name: Planetary Shield
+    cost: 200
+    maintenance: 6
+    prereqs: [class_i_shield]
+    description: Deflects incoming orbital fire.
+    effects:
+      defense: 15.0
+
+  - id: star_base
+    name: Star Base
+    cost: 200
+    maintenance: 5
+    description: Orbital defense platform; doubles as command point source.
+    effects:
+      defense: 20.0
+
+  - id: battle_station
+    name: Battle Station
+    cost: 500
+    maintenance: 10
+    prereqs: [star_base]
+    description: Large orbital fortress.
+    effects:
+      defense: 50.0
+
+  - id: star_fortress
+    name: Star Fortress
+    cost: 1000
+    maintenance: 20
+    prereqs: [battle_station]
+    description: Heaviest orbital defense platform; effectively a Titan in orbit.
+    effects:
+      defense: 100.0
+
+  - id: interstellar_patrol
+    name: Interstellar Patrol
+    cost: 250
+    maintenance: 5
+    description: Regular patrol of trade lanes; reduces espionage effectiveness.
+
+  - id: security_station
+    name: Security Station
+    cost: 150
+    maintenance: 4
+    description: Counter-intelligence facility; reduces enemy spy success chance.
+
+  - id: robotic_factory
+    name: Robotic Factory
+    cost: 120
+    maintenance: 3
+    prereqs: [zortrium_armor]
+    description: Produces android workers automatically each turn.
+    effects:
+      production: 0.15
+
+  - id: pollution_processor
+    name: Pollution Processor
+    cost: 140
+    maintenance: 2
+    description: Reduces pollution penalty on production.
+
+  - id: atmospheric_renewer
+    name: Atmospheric Renewer
+    cost: 250
+    maintenance: 5
+    prereqs: [terraforming]
+    description: Eliminates all pollution from the colony.
+
+  - id: soil_enrichment
+    name: Soil Enrichment
+    cost: 150
+    maintenance: 2
+    prereqs: [terraforming]
+    description: Enriches soil; increases food output and base population cap.
+    effects:
+      food: 0.3
+      max_pop: 1
+
+  - id: weather_controller
+    name: Weather Controller
+    cost: 300
+    maintenance: 5
+    prereqs: [advanced_terraforming]
+    description: Controls planetary weather; maximises agricultural yield.
+    effects:
+      food: 0.5
+
+  - id: planetary_supercomputer
+    name: Planetary Supercomputer
+    cost: 500
+    maintenance: 10
+    prereqs: [molecutronic_computer]
+    description: Planet-scale computing grid; maximum research output.
+    effects:
+      research: 0.4
+
+  - id: capitol
+    name: Capitol
+    cost: 500
+    maintenance: 0
+    description: Imperial seat of government; massive morale bonus empire-wide.
+    effects:
+      morale: 1.0

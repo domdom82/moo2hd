@@ -1,0 +1,395 @@
+components:
+  # Ship components for MOO2 / patch 1.50.
+  # space_cost: tons consumed from hull Space budget.
+  # power_draw: power units consumed per turn.
+  # power_gen:  power units produced (non-zero for engines only).
+  # tech_prereq: config.Technology.ID required; empty = always available.
+
+  # ── ENGINES ────────────────────────────────────────────────────────────────
+  - id: nuclear_drive
+    name: Nuclear Drive
+    kind: engine
+    slot_kind: special
+    space_cost: 8
+    power_draw: 0
+    power_gen: 5
+    tech_prereq: nuclear_drive
+
+  - id: fusion_drive
+    name: Fusion Drive
+    kind: engine
+    slot_kind: special
+    space_cost: 7
+    power_draw: 0
+    power_gen: 7
+    tech_prereq: fusion_drive
+
+  - id: ion_drive
+    name: Ion Drive
+    kind: engine
+    slot_kind: special
+    space_cost: 6
+    power_draw: 0
+    power_gen: 10
+    tech_prereq: ion_drive
+
+  - id: anti_matter_drive
+    name: Anti-Matter Drive
+    kind: engine
+    slot_kind: special
+    space_cost: 5
+    power_draw: 0
+    power_gen: 15
+    tech_prereq: anti_matter_drive
+
+  - id: hyper_drive
+    name: Hyper Drive
+    kind: engine
+    slot_kind: special
+    space_cost: 5
+    power_draw: 0
+    power_gen: 20
+    tech_prereq: hyper_drive
+
+  - id: interphased_drive
+    name: Interphased Drive
+    kind: engine
+    slot_kind: special
+    space_cost: 4
+    power_draw: 0
+    power_gen: 25
+    tech_prereq: interphased_drive
+
+  # ── WEAPONS ────────────────────────────────────────────────────────────────
+  - id: laser_cannon
+    name: Laser Cannon
+    kind: weapon
+    slot_kind: weapon
+    space_cost: 5
+    power_draw: 1
+    power_gen: 0
+
+  - id: gauss_cannon
+    name: Gauss Cannon
+    kind: weapon
+    slot_kind: weapon
+    space_cost: 5
+    power_draw: 2
+    power_gen: 0
+    tech_prereq: gauss_cannon
+
+  - id: ion_cannon
+    name: Ion Cannon
+    kind: weapon
+    slot_kind: weapon
+    space_cost: 6
+    power_draw: 3
+    power_gen: 0
+    tech_prereq: ion_cannon
+
+  - id: mass_driver
+    name: Mass Driver
+    kind: weapon
+    slot_kind: weapon
+    space_cost: 5
+    power_draw: 2
+    power_gen: 0
+    tech_prereq: mass_driver
+
+  - id: neutron_blaster
+    name: Neutron Blaster
+    kind: weapon
+    slot_kind: weapon
+    space_cost: 6
+    power_draw: 3
+    power_gen: 0
+    tech_prereq: neutron_blaster
+
+  - id: phasors
+    name: Phasors
+    kind: weapon
+    slot_kind: weapon
+    space_cost: 7
+    power_draw: 4
+    power_gen: 0
+    tech_prereq: phasors
+
+  - id: tachyon_beam
+    name: Tachyon Beam
+    kind: weapon
+    slot_kind: weapon
+    space_cost: 8
+    power_draw: 5
+    power_gen: 0
+    tech_prereq: tachyon_beam
+
+  - id: graviton_beam
+    name: Graviton Beam
+    kind: weapon
+    slot_kind: weapon
+    space_cost: 8
+    power_draw: 5
+    power_gen: 0
+    tech_prereq: graviton_beam
+
+  - id: particle_beam
+    name: Particle Beam
+    kind: weapon
+    slot_kind: weapon
+    space_cost: 8
+    power_draw: 5
+    power_gen: 0
+    tech_prereq: particle_beam
+
+  - id: plasma_cannon
+    name: Plasma Cannon
+    kind: weapon
+    slot_kind: weapon
+    space_cost: 10
+    power_draw: 7
+    power_gen: 0
+    tech_prereq: plasma_cannon
+
+  - id: disruptor
+    name: Disruptor
+    kind: weapon
+    slot_kind: weapon
+    space_cost: 12
+    power_draw: 8
+    power_gen: 0
+    tech_prereq: disruptor
+
+  - id: mauler_device
+    name: Mauler Device
+    kind: weapon
+    slot_kind: weapon
+    space_cost: 30
+    power_draw: 15
+    power_gen: 0
+    tech_prereq: mauler_device
+
+  - id: death_ray
+    name: Death Ray
+    kind: weapon
+    slot_kind: weapon
+    space_cost: 50
+    power_draw: 25
+    power_gen: 0
+    tech_prereq: death_ray
+
+  # ── BOMBS ──────────────────────────────────────────────────────────────────
+  - id: nuclear_bomb
+    name: Nuclear Bomb
+    kind: weapon
+    slot_kind: special
+    space_cost: 10
+    power_draw: 2
+    power_gen: 0
+    tech_prereq: nuclear_bomb
+
+  - id: fusion_bomb
+    name: Fusion Bomb
+    kind: weapon
+    slot_kind: special
+    space_cost: 15
+    power_draw: 3
+    power_gen: 0
+    tech_prereq: fusion_bomb
+
+  # ── SHIELDS ────────────────────────────────────────────────────────────────
+  - id: class_i_shield
+    name: Class I Shield
+    kind: shield
+    slot_kind: special
+    space_cost: 3
+    power_draw: 1
+    power_gen: 0
+    tech_prereq: class_i_shield
+
+  - id: class_iii_shield
+    name: Class III Shield
+    kind: shield
+    slot_kind: special
+    space_cost: 5
+    power_draw: 2
+    power_gen: 0
+    tech_prereq: class_iii_shield
+
+  - id: class_v_shield
+    name: Class V Shield
+    kind: shield
+    slot_kind: special
+    space_cost: 7
+    power_draw: 3
+    power_gen: 0
+    tech_prereq: class_v_shield
+
+  - id: class_vii_shield
+    name: Class VII Shield
+    kind: shield
+    slot_kind: special
+    space_cost: 10
+    power_draw: 5
+    power_gen: 0
+    tech_prereq: class_vii_shield
+
+  - id: class_x_shield
+    name: Class X Shield
+    kind: shield
+    slot_kind: special
+    space_cost: 14
+    power_draw: 7
+    power_gen: 0
+    tech_prereq: class_x_shield
+
+  - id: class_xv_shield
+    name: Class XV Shield
+    kind: shield
+    slot_kind: special
+    space_cost: 20
+    power_draw: 10
+    power_gen: 0
+    tech_prereq: class_xv_shield
+
+  - id: class_xx_shield
+    name: Class XX Shield
+    kind: shield
+    slot_kind: special
+    space_cost: 28
+    power_draw: 14
+    power_gen: 0
+    tech_prereq: class_xx_shield
+
+  # ── ARMOR ──────────────────────────────────────────────────────────────────
+  - id: titanium_armor
+    name: Titanium Armor
+    kind: armor
+    slot_kind: special
+    space_cost: 3
+    power_draw: 0
+    power_gen: 0
+    tech_prereq: titanium_armor
+
+  - id: duralloy_armor
+    name: Duralloy Armor
+    kind: armor
+    slot_kind: special
+    space_cost: 5
+    power_draw: 0
+    power_gen: 0
+    tech_prereq: duralloy_armor
+
+  - id: zortrium_armor
+    name: Zortrium Armor
+    kind: armor
+    slot_kind: special
+    space_cost: 7
+    power_draw: 0
+    power_gen: 0
+    tech_prereq: zortrium_armor
+
+  - id: neutronium_armor
+    name: Neutronium Armor
+    kind: armor
+    slot_kind: special
+    space_cost: 10
+    power_draw: 0
+    power_gen: 0
+    tech_prereq: neutronium_armor
+
+  - id: adamantium_armor
+    name: Adamantium Armor
+    kind: armor
+    slot_kind: special
+    space_cost: 14
+    power_draw: 0
+    power_gen: 0
+    tech_prereq: adamantium_armor
+
+  - id: tritanium_armor
+    name: Tritanium Armor
+    kind: armor
+    slot_kind: special
+    space_cost: 18
+    power_draw: 0
+    power_gen: 0
+    tech_prereq: tritanium_armor
+
+  - id: uridium_armor
+    name: Uridium Armor
+    kind: armor
+    slot_kind: special
+    space_cost: 25
+    power_draw: 0
+    power_gen: 0
+    tech_prereq: uridium_armor
+
+  # ── SPECIALS ───────────────────────────────────────────────────────────────
+  - id: battle_scanner
+    name: Battle Scanner
+    kind: special
+    slot_kind: special
+    space_cost: 5
+    power_draw: 2
+    power_gen: 0
+    tech_prereq: electronic_computer
+
+  - id: advanced_damage_control
+    name: Advanced Damage Control
+    kind: special
+    slot_kind: special
+    space_cost: 5
+    power_draw: 1
+    power_gen: 0
+    tech_prereq: advanced_damage_control
+
+  - id: automated_repair
+    name: Automated Repair Unit
+    kind: special
+    slot_kind: special
+    space_cost: 8
+    power_draw: 2
+    power_gen: 0
+    tech_prereq: automated_repair
+
+  - id: inertial_stabilizer
+    name: Inertial Stabilizer
+    kind: special
+    slot_kind: special
+    space_cost: 3
+    power_draw: 1
+    power_gen: 0
+    tech_prereq: inertial_stabilizer
+
+  - id: inertial_nullifier
+    name: Inertial Nullifier
+    kind: special
+    slot_kind: special
+    space_cost: 5
+    power_draw: 2
+    power_gen: 0
+    tech_prereq: inertial_nullifier
+
+  - id: colony_base_module
+    name: Colony Base Module
+    kind: special
+    slot_kind: special
+    space_cost: 40
+    power_draw: 0
+    power_gen: 0
+
+  - id: outpost_module
+    name: Outpost Module
+    kind: special
+    slot_kind: special
+    space_cost: 20
+    power_draw: 0
+    power_gen: 0
+
+  - id: transport_bays
+    name: Transport Bays
+    kind: special
+    slot_kind: special
+    space_cost: 30
+    power_draw: 0
+    power_gen: 0

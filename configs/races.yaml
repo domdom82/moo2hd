@@ -1,0 +1,157 @@
+races:
+  # The 13 predefined races from MOO2 / patch 1.50
+  # pick_total is the sum of pick costs for all selected traits.
+  # Traits use the names from the racial_traits documentation.
+
+  - id: human
+    name: Human
+    description: Adaptable, charismatic diplomats from Sol III.
+    government: democracy
+    home_world: terran
+    pick_total: 10
+    traits:
+      - charismatic
+      - fantastic_traders
+      - diplomatic
+    bonuses:
+      morale: 0.1
+
+  - id: psilon
+    name: Psilon
+    description: Brilliant scientists with fragile frames; always creative.
+    government: dictatorship
+    home_world: terran
+    pick_total: 10
+    traits:
+      - creative
+    bonuses:
+      research: 0.5
+
+  - id: bulrathi
+    name: Bulrathi
+    description: Powerful bear-like warriors who dominate ground combat.
+    government: dictatorship
+    home_world: terran
+    pick_total: 10
+    traits:
+      - high_g_world
+      - ground_combat
+    bonuses:
+      production: 0.1
+
+  - id: alkari
+    name: Alkari
+    description: Avian pilots with exceptional ship defense and maneuverability.
+    government: dictatorship
+    home_world: terran
+    pick_total: 10
+    traits:
+      - ship_defense
+    bonuses:
+      ship: 0.1
+
+  - id: mrrshan
+    name: Mrrshan
+    description: Aggressive feline predators with deadly aim in ship combat.
+    government: dictatorship
+    home_world: arid
+    pick_total: 10
+    traits:
+      - ship_attack
+    bonuses:
+      ship: 0.25
+
+  - id: sakkra
+    name: Sakkra
+    description: Prolific reptiles whose fast breeding floods planets with population.
+    government: dictatorship
+    home_world: swamp
+    pick_total: 10
+    traits:
+      - subterranean
+      - fast_breeder
+    bonuses:
+      food: 0.2
+
+  - id: darlok
+    name: Darlok
+    description: Mysterious shape-shifters who excel at infiltration and espionage.
+    government: dictatorship
+    home_world: barren
+    pick_total: 10
+    traits:
+      - stealthy_ships
+      - spying
+    bonuses:
+      espionage: 0.5
+
+  - id: klackon
+    name: Klackon
+    description: Hive-mind insects with unmatched industrial output under unification.
+    government: unification
+    home_world: terran
+    pick_total: 10
+    traits:
+      - uncreative
+      - industry
+    bonuses:
+      production: 0.5
+
+  - id: meklar
+    name: Meklar
+    description: Cybernetic beings who repair themselves and their ships automatically.
+    government: dictatorship
+    home_world: radiated
+    pick_total: 10
+    traits:
+      - cybernetic
+      - tolerant
+    bonuses:
+      production: 0.1
+
+  - id: silicoid
+    name: Silicoid
+    description: Silicon-based creatures that can colonize any world without food.
+    government: dictatorship
+    home_world: volcanic
+    pick_total: 10
+    traits:
+      - lithovore
+      - tolerant
+      - repulsive
+
+  - id: gnolam
+    name: Gnolam
+    description: Shrewd traders with lucky streaks and enormous banking reserves.
+    government: democracy
+    home_world: terran
+    pick_total: 10
+    traits:
+      - lucky
+      - fantastic_traders
+      - money
+    bonuses:
+      morale: 0.1
+
+  - id: elerian
+    name: Elerian
+    description: Telepathic mystics who can seize colonies and assimilate instantly.
+    government: dictatorship
+    home_world: ocean
+    pick_total: 10
+    traits:
+      - telepathic
+      - omniscient
+      - low_g_world
+
+  - id: trilarian
+    name: Trilarian
+    description: Aquatic nomads at home in ocean worlds; travel through wormholes.
+    government: dictatorship
+    home_world: ocean
+    pick_total: 10
+    traits:
+      - aquatic
+      - trans_dimensional
+    bonuses:
+      food: 0.15

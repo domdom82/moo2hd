@@ -1,0 +1,21 @@
+# LBX asset files (player must own original game)
+assets/*.LBX
+assets/fonts/*.ttf
+
+# Build output
+bin/
+dist/
+
+# Go
+*.test
+*.out
+coverage.html
+
+# Editor
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# macOS
+.DS_Store

@@ -1,0 +1,145 @@
+ships:
+  # Hull stats based on original MOO2 game data.
+  # space:        internal equipment space in tons.
+  # hp:           internal systems hit points (destroyed when all internals are hit).
+  # structure:    structural hit points — must be reduced to 0 before internals take
+  #               damage. Scales with armor technology level.
+  # armor_class:  base armor rating; each armor tech level multiplies this and adds an
+  #               additional ablative armor layer on top of structure.
+  # shield_class: base shield class (1=Class I, 3=Class III, 5=Class V, etc.).
+  #               Shields regenerate each combat round and absorb damage before
+  #               structure is hit. 0 means no shields installed by default.
+  # speed:        base combat speed before engine technology bonuses.
+  # cost:         base production cost in BC; reduced by industrial techs.
+  # weapon_slots: number of weapon mount hardpoints.
+  # special_slots: number of special equipment slots.
+
+  - id: scout
+    name: Scout
+    hull: frigate
+    space: 40
+    hp: 3
+    structure: 10
+    armor_class: 0
+    shield_class: 0
+    speed: 3
+    cost: 20
+    weapon_slots: 1
+    special_slots: 1
+
+  - id: colony_ship
+    name: Colony Ship
+    hull: destroyer
+    space: 100
+    hp: 8
+    structure: 25
+    armor_class: 0
+    shield_class: 0
+    speed: 2
+    cost: 80
+    weapon_slots: 0
+    special_slots: 2
+
+  - id: outpost_ship
+    name: Outpost Ship
+    hull: destroyer
+    space: 100
+    hp: 8
+    structure: 25
+    armor_class: 0
+    shield_class: 0
+    speed: 2
+    cost: 60
+    weapon_slots: 0
+    special_slots: 1
+
+  - id: transport
+    name: Transport
+    hull: destroyer
+    space: 100
+    hp: 8
+    structure: 25
+    armor_class: 0
+    shield_class: 0
+    speed: 2
+    cost: 40
+    weapon_slots: 0
+    special_slots: 0
+
+  - id: frigate
+    name: Frigate
+    hull: frigate
+    space: 50
+    hp: 3
+    structure: 10
+    armor_class: 0
+    shield_class: 0
+    speed: 3
+    cost: 40
+    weapon_slots: 2
+    special_slots: 1
+
+  - id: destroyer
+    name: Destroyer
+    hull: destroyer
+    space: 100
+    hp: 8
+    structure: 25
+    armor_class: 0
+    shield_class: 0
+    speed: 3
+    cost: 90
+    weapon_slots: 4
+    special_slots: 2
+
+  - id: cruiser
+    name: Cruiser
+    hull: cruiser
+    space: 200
+    hp: 20
+    structure: 60
+    armor_class: 0
+    shield_class: 0
+    speed: 2
+    cost: 200
+    weapon_slots: 6
+    special_slots: 3
+
+  - id: battleship
+    name: Battleship
+    hull: battleship
+    space: 400
+    hp: 60
+    structure: 150
+    armor_class: 0
+    shield_class: 0
+    speed: 2
+    cost: 500
+    weapon_slots: 10
+    special_slots: 4
+
+  - id: titan
+    name: Titan
+    hull: titan
+    space: 800
+    hp: 130
+    structure: 300
+    armor_class: 0
+    shield_class: 0
+    speed: 1
+    cost: 1000
+    weapon_slots: 15
+    special_slots: 6
+
+  - id: doom_star
+    name: Doom Star
+    hull: doom_star
+    space: 1200
+    hp: 300
+    structure: 600
+    armor_class: 0
+    shield_class: 0
+    speed: 1
+    cost: 2500
+    weapon_slots: 20
+    special_slots: 8

@@ -1,0 +1,123 @@
+planets:
+  # Planet type definitions for MOO2.
+  # max_pop: base maximum population in millions (before Subterranean, Aquatic,
+  #          Tolerant, and terraforming bonuses; also multiplied by planet size).
+  # food_mod, prod_mod, research_mod: multipliers on base output per worker.
+  # richness:  ultra-poor | poor | abundant | rich | ultra-rich (affects prod_mod at
+  #            game generation time; these are the default values).
+  # gravity:   low | normal | high (penalties for incompatible races).
+
+  - id: gaia
+    class: gaia
+    max_pop: 25
+    food_mod: 2.0
+    prod_mod: 1.5
+    research_mod: 1.0
+    richness: abundant
+    gravity: normal
+
+  - id: terran
+    class: terran
+    max_pop: 14
+    food_mod: 1.0
+    prod_mod: 1.0
+    research_mod: 1.0
+    richness: abundant
+    gravity: normal
+
+  - id: ocean
+    class: ocean
+    max_pop: 12
+    food_mod: 1.5
+    prod_mod: 0.8
+    research_mod: 1.0
+    richness: abundant
+    gravity: normal
+
+  - id: swamp
+    class: swamp
+    max_pop: 11
+    food_mod: 0.8
+    prod_mod: 0.7
+    research_mod: 1.0
+    richness: abundant
+    gravity: normal
+
+  - id: arid
+    class: arid
+    max_pop: 10
+    food_mod: 0.5
+    prod_mod: 1.2
+    research_mod: 1.0
+    richness: poor
+    gravity: normal
+
+  - id: tundra
+    class: tundra
+    max_pop: 8
+    food_mod: 0.6
+    prod_mod: 0.9
+    research_mod: 1.0
+    richness: poor
+    gravity: normal
+
+  - id: desert
+    class: desert
+    max_pop: 8
+    food_mod: 0.4
+    prod_mod: 1.1
+    research_mod: 1.0
+    richness: poor
+    gravity: normal
+
+  - id: volcanic
+    class: volcanic
+    max_pop: 6
+    food_mod: 0.2
+    prod_mod: 1.5
+    research_mod: 1.0
+    richness: rich
+    gravity: high
+
+  - id: inferno
+    class: inferno
+    max_pop: 5
+    food_mod: 0.0
+    prod_mod: 1.3
+    research_mod: 1.0
+    richness: poor
+    gravity: high
+
+  - id: barren
+    class: barren
+    max_pop: 5
+    food_mod: 0.0
+    prod_mod: 0.8
+    research_mod: 1.0
+    richness: poor
+    gravity: low
+
+  - id: radiated
+    class: radiated
+    max_pop: 4
+    food_mod: 0.0
+    prod_mod: 0.6
+    research_mod: 1.0
+    richness: ultra-poor
+    gravity: low
+
+  - id: toxic
+    class: toxic
+    max_pop: 3
+    food_mod: 0.0
+    prod_mod: 0.5
+    research_mod: 1.0
+    richness: ultra-poor
+    gravity: normal
+
+  - id: none
+    class: none
+    max_pop: 0
+    food_mod: 0.0
+    prod_mod: 0.0
+    research_mod: 0.0

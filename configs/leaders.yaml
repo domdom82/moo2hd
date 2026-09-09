@@ -1,0 +1,48 @@
+leaders:
+  - id: napoleon_iv
+    name: Napoleon IV
+    type: admiral
+    level: 3
+    cost: 200
+    salary: 15
+    skills:
+      - attack_bonus
+      - initiative
+    bonuses:
+      ship: 0.2
+
+  - id: dr_galax
+    name: Dr. Galax
+    type: scientist
+    level: 2
+    cost: 150
+    salary: 10
+    skills:
+      - researcher
+    bonuses:
+      research: 0.3
+
+  - id: governess_ria
+    name: Governess Ria
+    type: governor
+    level: 2
+    cost: 100
+    salary: 8
+    skills:
+      - farming_bonus
+      - production_bonus
+    bonuses:
+      food: 0.15
+      production: 0.1
+
+  - id: shadow_one
+    name: Shadow One
+    type: spy
+    level: 4
+    cost: 300
+    salary: 20
+    skills:
+      - infiltration
+      - sabotage
+    bonuses:
+      espionage: 0.4
