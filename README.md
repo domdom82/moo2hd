@@ -14,5 +14,6 @@ All config is YAML; mods work by dropping YAML overrides into a `mods/` subdirec
 - Multiple auto build queues to support different roles for a colony.
 - Colony groups allowing to set build queues for multiple colonies at once.
 - Rally points to automatically send newly produced ships to a target destination. Also usable with colony groups.
+- Modding support via YAML config extensions
 
 **WORK VERY MUCH IN PROGRESS**
