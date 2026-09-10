@@ -41,13 +41,21 @@ func main() {
 	sm := ui.NewStarMap(g, cam, font)
 	ih := ui.NewInputHandler(sm.Camera(), 1000, 1000)
 
+	var lastTick uint64 = sdl.Ticks()
+
 	sdl.RunLoop(func() error {
+		now := sdl.Ticks()
+		dt := float32(now-lastTick) / 1000.0
+		lastTick = now
+
 		var event sdl.Event
 		for sdl.PollEvent(&event) {
 			if err := ih.Handle(&event); err != nil {
 				return err
 			}
 		}
+
+		ih.Update(dt)
 		return sm.Draw(renderer)
 	})
 }
