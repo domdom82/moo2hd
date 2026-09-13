@@ -23,7 +23,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	g, err := galaxy.NewGenerator(galaxy.Options{Seed: 42, SystemCount: 70}).Generate()
+	g, err := galaxy.NewGenerator(galaxy.Options{Seed: 42, SystemCount: 1000}).Generate()
 	if err != nil {
 		log.Fatal(err)
 	}

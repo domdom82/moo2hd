@@ -55,6 +55,7 @@ type System struct {
 	Star    StarType
 	Size    SystemSize
 	Planets []PlanetID
+	Faction int // 0-based faction index; -1 = unclaimed
 }
 
 // Galaxy is the complete procedurally-generated star map.
