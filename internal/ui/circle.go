@@ -6,11 +6,15 @@ import (
 	"github.com/Zyko0/go-sdl3/sdl"
 )
 
-const circleSegments = 16
+const circleSegments = 32
 
-// unitFan holds the precomputed unit-radius triangle fan:
+// unitFan holds the precomputed unit-radius points:
 // index 0 is the centre at origin; indices 1..circleSegments+1 are the ring.
 var unitFan [circleSegments + 2]sdl.FPoint
+
+// circleIndices encodes the triangle fan as explicit index triples so SDL3
+// renders it correctly regardless of primitive topology assumptions.
+var circleIndices [circleSegments * 3]int32
 
 func init() {
 	unitFan[0] = sdl.FPoint{X: 0, Y: 0}
@@ -21,11 +25,17 @@ func init() {
 			Y: float32(math.Sin(angle)),
 		}
 	}
+	for i := range circleSegments {
+		circleIndices[i*3+0] = 0
+		circleIndices[i*3+1] = int32(i + 1)
+		circleIndices[i*3+2] = int32(i + 2)
+	}
 }
 
-// buildCircleVertices returns a (circleSegments+2)-element triangle fan centred
-// at (cx, cy) with the given radius and colour.
-// Pass the result directly to renderer.RenderGeometry(nil, verts, nil).
+// buildCircleVertices returns the vertex buffer for a filled circle centred at
+// (cx, cy) with the given radius and colour. Use with circleIndices:
+//
+//	r.RenderGeometry(nil, verts, circleIndices[:])
 func buildCircleVertices(cx, cy, radius float32, col sdl.FColor) []sdl.Vertex {
 	verts := make([]sdl.Vertex, circleSegments+2)
 	for i, p := range unitFan {

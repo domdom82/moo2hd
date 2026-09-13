@@ -46,8 +46,8 @@ func (sm *StarMap) Draw(r *sdl.Renderer) error {
 }
 
 // drawFar renders each system as a large semi-transparent filled circle
-// coloured by placeholder faction index. Overlapping alpha circles give
-// an organic territory feel that approximates Voronoi regions.
+// coloured by faction. Overlapping alpha circles give an organic territory
+// feel that approximates Voronoi regions.
 func (sm *StarMap) drawFar(r *sdl.Renderer) {
 	const galaxyRadius = float32(60.0)
 	r.SetDrawBlendMode(sdl.BLENDMODE_BLEND)
@@ -58,19 +58,25 @@ func (sm *StarMap) drawFar(r *sdl.Renderer) {
 			continue
 		}
 		sx, sy := sm.cam.GalaxyToScreen(sys.X, sys.Y)
-		col := FactionColor(i)
+		col := FactionColor(sys.Faction)
 		verts := buildCircleVertices(sx, sy, screenR, col)
-		r.RenderGeometry(nil, verts, nil)
+		r.RenderGeometry(nil, verts, circleIndices[:])
 	}
 }
 
-// drawMid renders travel lanes and small star discs.
+// drawRegions draws the faction territory blobs (same as drawFar).
+func (sm *StarMap) drawRegions(r *sdl.Renderer) {
+	sm.drawFar(r)
+}
+
+// drawMid renders faction regions, travel lanes, and small star discs.
 func (sm *StarMap) drawMid(r *sdl.Renderer) {
+	sm.drawRegions(r)
 	sm.drawLanes(r, ZoomMid)
 	sm.drawStars(r, 4.0)
 }
 
-// drawClose renders lanes, stars, system names, and planet counts.
+// drawClose renders lanes, stars, and system name/planet-count labels.
 func (sm *StarMap) drawClose(r *sdl.Renderer) {
 	sm.drawLanes(r, ZoomClose)
 	sm.drawStars(r, 5.0)
@@ -108,7 +114,7 @@ func (sm *StarMap) drawStars(r *sdl.Renderer, baseRadius float32) {
 		}
 		col := StarColor(sys.Star)
 		verts := buildCircleVertices(sx, sy, radius, col)
-		r.RenderGeometry(nil, verts, nil)
+		r.RenderGeometry(nil, verts, circleIndices[:])
 	}
 }
 

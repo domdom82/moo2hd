@@ -40,10 +40,13 @@ var factionColors = [8]sdl.FColor{
 	{R: 1.00, G: 0.50, B: 0.75, A: 0.55},
 }
 
-// FactionColor returns a placeholder territory color keyed by system index.
-// Wraps at 8; real faction ownership is wired in a later phase.
-func FactionColor(systemIndex int) sdl.FColor {
-	return factionColors[systemIndex%len(factionColors)]
+// FactionColor returns the territory color for a faction ID (0-based).
+// Wraps at 8.
+func FactionColor(factionID int) sdl.FColor {
+	if factionID < 0 {
+		return sdl.FColor{R: 0.3, G: 0.3, B: 0.3, A: 0.3} // unclaimed
+	}
+	return factionColors[factionID%len(factionColors)]
 }
 
 // LaneColor returns the color for travel lanes at the given zoom tier.
