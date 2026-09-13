@@ -29,6 +29,18 @@ const (
 	SizeLarge  SystemSize = "large"
 )
 
+// Special describes the optional special property of a star system.
+type Special string
+
+const (
+	SpecialNone        Special = ""
+	SpecialPlanet      Special = "planet"
+	SpecialWormhole    Special = "wormhole"
+	SpecialShipDebris  Special = "ship_debris"
+	SpecialPirateCache Special = "pirate_cache"
+	SpecialLostHero    Special = "lost_hero"
+)
+
 // Planet is a single planet body stored in Galaxy.Planets.
 type Planet struct {
 	ID       PlanetID
@@ -49,13 +61,15 @@ type Lane struct {
 
 // System is a star system in the galaxy.
 type System struct {
-	ID      SystemID
-	Name    string
-	X, Y    float32
-	Star    StarType
-	Size    SystemSize
-	Planets []PlanetID
-	Faction int // 0-based faction index; -1 = unclaimed
+	ID         SystemID
+	Name       string
+	X, Y       float32
+	Star       StarType
+	Size       SystemSize
+	Planets    []PlanetID
+	Faction    int     // 0-based faction index; -1 = unclaimed
+	Special    Special // optional special property
+	WormholeTo SystemID // partner system ID for wormholes; -1 if none
 }
 
 // Galaxy is the complete procedurally-generated star map.

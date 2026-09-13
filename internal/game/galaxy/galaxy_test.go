@@ -82,39 +82,6 @@ var _ = Describe("Galaxy", func() {
 			Expect(len(seen)).To(Equal(len(g.Planets)))
 		})
 
-		It("connects the galaxy (every system reachable from system 0)", func() {
-			g, err := galaxy.NewGenerator(defaultOpts(12, 50)).Generate()
-			Expect(err).NotTo(HaveOccurred())
-
-			visited := make(map[galaxy.SystemID]bool)
-			queue := []galaxy.SystemID{0}
-			for len(queue) > 0 {
-				cur := queue[0]
-				queue = queue[1:]
-				if visited[cur] {
-					continue
-				}
-				visited[cur] = true
-				for _, l := range g.Adjacency[cur] {
-					if !visited[l.To] {
-						queue = append(queue, l.To)
-					}
-				}
-			}
-			Expect(len(visited)).To(Equal(len(g.Systems)))
-		})
-
-		It("respects MaxLanes per system", func() {
-			opts := galaxy.Options{Seed: 3, SystemCount: 30, MaxLanes: 3}
-			g, err := galaxy.NewGenerator(opts).Generate()
-			Expect(err).NotTo(HaveOccurred())
-			for _, lanes := range g.Adjacency {
-				// connectivity-stitching can add one extra lane per isolated node, so
-				// we allow MaxLanes + small slack rather than an exact cap
-				Expect(len(lanes)).To(BeNumerically("<=", 8))
-			}
-		})
-
 		It("generates a 1000-system galaxy in under 5 seconds", func() {
 			start := time.Now()
 			_, err := galaxy.NewGenerator(defaultOpts(55, 1000)).Generate()
@@ -135,6 +102,62 @@ var _ = Describe("Galaxy", func() {
 			g, _ := galaxy.NewGenerator(defaultOpts(1, 5)).Generate()
 			_, ok := g.SystemByName("ZZZnonexistent")
 			Expect(ok).To(BeFalse())
+		})
+
+		It("wormhole systems are paired correctly", func() {
+			g, err := galaxy.NewGenerator(defaultOpts(42, 200)).Generate()
+			Expect(err).NotTo(HaveOccurred())
+			for i, sys := range g.Systems {
+				if sys.Special != galaxy.SpecialWormhole {
+					continue
+				}
+				partner := sys.WormholeTo
+				Expect(int(partner)).To(BeNumerically(">=", 0))
+				Expect(int(partner)).To(BeNumerically("<", len(g.Systems)))
+				Expect(g.Systems[partner].Special).To(Equal(galaxy.SpecialWormhole))
+				Expect(g.Systems[partner].WormholeTo).To(Equal(galaxy.SystemID(i)))
+			}
+		})
+
+		It("wormhole adjacency is bidirectional with distance 1", func() {
+			g, err := galaxy.NewGenerator(defaultOpts(42, 200)).Generate()
+			Expect(err).NotTo(HaveOccurred())
+			for i, sys := range g.Systems {
+				if sys.Special != galaxy.SpecialWormhole {
+					Expect(g.Adjacency[i]).To(BeEmpty())
+					continue
+				}
+				j := sys.WormholeTo
+				// i -> j at distance 1
+				Expect(g.Adjacency[i]).To(ContainElement(galaxy.Lane{To: j, Distance: 1}))
+				// j -> i at distance 1
+				Expect(g.Adjacency[j]).To(ContainElement(galaxy.Lane{To: galaxy.SystemID(i), Distance: 1}))
+			}
+		})
+
+		It("non-wormhole systems have WormholeTo == -1", func() {
+			g, err := galaxy.NewGenerator(defaultOpts(7, 100)).Generate()
+			Expect(err).NotTo(HaveOccurred())
+			for _, sys := range g.Systems {
+				if sys.Special != galaxy.SpecialWormhole {
+					Expect(sys.WormholeTo).To(Equal(galaxy.SystemID(-1)))
+				}
+			}
+		})
+
+		It("special distribution is roughly correct over a large galaxy", func() {
+			g, err := galaxy.NewGenerator(defaultOpts(99, 1000)).Generate()
+			Expect(err).NotTo(HaveOccurred())
+			counts := map[galaxy.Special]int{}
+			for _, sys := range g.Systems {
+				counts[sys.Special]++
+			}
+			total := float64(len(g.Systems))
+			// None ~78%, allow ±10% absolute
+			Expect(float64(counts[galaxy.SpecialNone])/total).To(BeNumerically("~", 0.78, 0.1))
+			// Wormhole ~5% — but paired systems consume 2 slots, plus some eligible
+			// systems become wormhole targets; exact count varies, so allow a wide band.
+			Expect(counts[galaxy.SpecialWormhole]).To(BeNumerically(">", 0))
 		})
 	})
 

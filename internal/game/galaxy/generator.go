@@ -13,8 +13,6 @@ type Options struct {
 	FactionCount int     // 1–8; default 8
 	Width        float32 // map extent in arbitrary units; default 1000
 	Height       float32
-	MinLanes     int     // minimum lanes per system; default 1
-	MaxLanes     int     // maximum lanes per system; default 4
 	MinDistance  float32 // minimum separation between systems; default 40
 }
 
@@ -30,12 +28,6 @@ func (o *Options) setDefaults() {
 	}
 	if o.Height == 0 {
 		o.Height = 1000
-	}
-	if o.MinLanes == 0 {
-		o.MinLanes = 1
-	}
-	if o.MaxLanes == 0 {
-		o.MaxLanes = 4
 	}
 	if o.MinDistance == 0 {
 		o.MinDistance = 40
@@ -69,7 +61,7 @@ func (g *Generator) Generate() (*Galaxy, error) {
 	systems := g.placeSystems(n)
 	g.assignFactions(systems)
 	planets := g.generatePlanets(systems)
-	adj := g.buildLanes(systems)
+	adj := g.assignSpecials(systems)
 
 	nameMap := make(map[string]SystemID, len(systems))
 	for i, s := range systems {
@@ -97,12 +89,13 @@ func (g *Generator) placeSystems(n int) []System {
 		if !g.tooClose(x, y, systems) {
 			id := SystemID(len(systems))
 			systems = append(systems, System{
-				ID:   id,
-				Name: systemName(int(id)),
-				X:    x,
-				Y:    y,
-				Star: g.randomStar(),
-				Size: g.randomSize(),
+				ID:         id,
+				Name:       systemName(int(id)),
+				X:          x,
+				Y:          y,
+				Star:       g.randomStar(),
+				Size:       g.randomSize(),
+				WormholeTo: -1,
 			})
 		}
 	}
@@ -161,109 +154,67 @@ func (g *Generator) assignFactions(systems []System) {
 	}
 }
 
-func dist(a, b System) float32 {
-	dx := a.X - b.X
-	dy := a.Y - b.Y
-	return float32(math.Sqrt(float64(dx*dx + dy*dy)))
-}
-
-// buildLanes connects systems via k-nearest-neighbours, then ensures full
-// connectivity via union-find, then prunes excess lanes.
-func (g *Generator) buildLanes(systems []System) [][]Lane {
+// assignSpecials rolls a special property for each system according to the
+// MOO2 distribution, then pairs wormhole systems. It returns the adjacency
+// slice (non-nil only for wormhole pairs, stored bidirectionally at distance 1).
+func (g *Generator) assignSpecials(systems []System) [][]Lane {
 	n := len(systems)
 	adj := make([][]Lane, n)
 
-	k := g.opts.MaxLanes
-	// k-NN pass
-	for i := 0; i < n; i++ {
-		type nd struct {
-			id   int
-			dist float32
-		}
-		nbrs := make([]nd, 0, n-1)
-		for j := 0; j < n; j++ {
-			if j == i {
-				continue
-			}
-			nbrs = append(nbrs, nd{j, dist(systems[i], systems[j])})
-		}
-		// partial sort: keep top k closest
-		for pick := 0; pick < k && pick < len(nbrs); pick++ {
-			best := pick
-			for m := pick + 1; m < len(nbrs); m++ {
-				if nbrs[m].dist < nbrs[best].dist {
-					best = m
-				}
-			}
-			nbrs[pick], nbrs[best] = nbrs[best], nbrs[pick]
-			j := nbrs[pick].id
-			d := nbrs[pick].dist
-			adj[i] = appendLane(adj[i], SystemID(j), d)
-			adj[j] = appendLane(adj[j], SystemID(i), d)
+	specials := []Special{
+		SpecialNone, SpecialPlanet, SpecialWormhole,
+		SpecialShipDebris, SpecialPirateCache, SpecialLostHero,
+	}
+	weights := []int{78, 10, 5, 2, 2, 2} // sum = 99; close enough to 100
+
+	// First pass: roll each system's special independently.
+	for i := range systems {
+		systems[i].Special = pickWeighted(g.rng, specials, weights)
+	}
+
+	// Second pass: pair wormhole systems.
+	// eligible = indices with no special yet (will be used as wormhole targets).
+	// We iterate wormhole candidates in order; for each we pick a random
+	// eligible partner that has not yet been assigned any special.
+	eligible := make([]int, 0, n)
+	for i := range systems {
+		if systems[i].Special == SpecialNone {
+			eligible = append(eligible, i)
 		}
 	}
 
-	// union-find connectivity guarantee
-	parent := make([]int, n)
-	for i := range parent {
-		parent[i] = i
-	}
-	var find func(int) int
-	find = func(x int) int {
-		if parent[x] != x {
-			parent[x] = find(parent[x])
+	for i := range systems {
+		if systems[i].Special != SpecialWormhole {
+			continue
 		}
-		return parent[x]
-	}
-	union := func(a, b int) { parent[find(a)] = find(b) }
+		// Skip systems that were already assigned as a wormhole target in a
+		// previous iteration (their WormholeTo is already set).
+		if systems[i].WormholeTo >= 0 {
+			continue
+		}
+		if len(eligible) == 0 {
+			// No free partner — downgrade this system.
+			systems[i].Special = SpecialNone
+			continue
+		}
+		// Pick a random eligible partner.
+		pick := g.rng.IntN(len(eligible))
+		j := eligible[pick]
+		// Remove j from eligible by swapping with the last element.
+		eligible[pick] = eligible[len(eligible)-1]
+		eligible = eligible[:len(eligible)-1]
 
-	for i, lanes := range adj {
-		for _, l := range lanes {
-			union(i, int(l.To))
-		}
-	}
+		// Link the pair.
+		systems[i].WormholeTo = SystemID(j)
+		systems[j].WormholeTo = SystemID(i)
+		systems[j].Special = SpecialWormhole
 
-	// connect isolated components by stitching to nearest connected node
-	for pass := 0; pass < n; pass++ {
-		allSame := true
-		root := find(0)
-		for i := 1; i < n; i++ {
-			if find(i) != root {
-				allSame = false
-				// find nearest system in the main component
-				bestDist := float32(math.MaxFloat32)
-				bestJ := -1
-				for j := 0; j < n; j++ {
-					if find(j) == root {
-						d := dist(systems[i], systems[j])
-						if d < bestDist {
-							bestDist = d
-							bestJ = j
-						}
-					}
-				}
-				if bestJ >= 0 {
-					adj[i] = appendLane(adj[i], SystemID(bestJ), bestDist)
-					adj[bestJ] = appendLane(adj[bestJ], SystemID(i), bestDist)
-					union(i, bestJ)
-				}
-			}
-		}
-		if allSame {
-			break
-		}
+		// Add bidirectional adjacency with distance=1 (one turn travel).
+		adj[i] = append(adj[i], Lane{To: SystemID(j), Distance: 1})
+		adj[j] = append(adj[j], Lane{To: SystemID(i), Distance: 1})
 	}
 
 	return adj
-}
-
-func appendLane(lanes []Lane, to SystemID, d float32) []Lane {
-	for _, l := range lanes {
-		if l.To == to {
-			return lanes // deduplicate
-		}
-	}
-	return append(lanes, Lane{To: to, Distance: d})
 }
 
 // generatePlanets creates planets for all systems and attaches their IDs.
