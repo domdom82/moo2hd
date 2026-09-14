@@ -23,7 +23,10 @@ func main() {
 		log.Fatal(err)
 	}
 
-	g, err := galaxy.NewGenerator(galaxy.Options{Seed: 42, SystemCount: 1000}).Generate()
+	glxOpt := galaxy.OptionsForSize(galaxy.GalaxySizeHuge)
+	glxOpt.Seed = 42
+
+	g, err := galaxy.NewGenerator(glxOpt).Generate()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -35,13 +38,13 @@ func main() {
 	defer window.Destroy()
 	defer renderer.Destroy()
 
-	cam := ui.NewCamera(windowW, windowH)
+	cam := ui.NewCamera(windowW, windowH, glxOpt.Width, glxOpt.Height)
 	font := ui.NewFontManager(renderer, "assets/fonts/DejaVuSans.ttf", 14)
 	defer font.Close()
 	sm := ui.NewStarMap(g, cam, font)
-	ih := ui.NewInputHandler(sm.Camera(), 1000, 1000)
+	ih := ui.NewInputHandler(sm.Camera(), glxOpt.Width, glxOpt.Height)
 
-	var lastTick uint64 = sdl.Ticks()
+	lastTick := sdl.Ticks()
 
 	sdl.RunLoop(func() error {
 		now := sdl.Ticks()

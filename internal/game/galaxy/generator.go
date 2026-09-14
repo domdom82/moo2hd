@@ -16,6 +16,23 @@ type Options struct {
 	MinDistance  float32 // minimum separation between systems; default 40
 }
 
+// OptionsForSize returns Options pre-populated with the canonical star count
+// and map dimensions for the given GalaxySize. Seed and FactionCount must be
+// set by the caller; MinDistance is derived from map area and star count.
+func OptionsForSize(size GalaxySize) Options {
+	p := sizeParams[size]
+	// Derive MinDistance so stars are roughly evenly spaced: area / n gives
+	// the area per star, and the square root of that is a sensible spacing.
+	area := p.Width * p.Height
+	minDist := float32(math.Sqrt(float64(area) / float64(p.StarCount)))
+	return Options{
+		SystemCount: p.StarCount,
+		Width:       p.Width,
+		Height:      p.Height,
+		MinDistance: minDist,
+	}
+}
+
 func (o *Options) setDefaults() {
 	if o.SystemCount == 0 {
 		o.SystemCount = 70

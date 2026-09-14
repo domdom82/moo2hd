@@ -55,17 +55,30 @@ type Camera struct {
 	zoomActive bool
 }
 
-// NewCamera returns a Camera centred on the middle of a 1000×1000 galaxy
-// at a zoom level that starts in the Far tier.
-func NewCamera(screenW, screenH float32) Camera {
-	return Camera{
-		CenterX: 500,
-		CenterY: 500,
-		Zoom:    0.6,
-		logZoom: float32(math.Log(0.6)),
+// NewCamera returns a Camera centred on the galaxy and zoomed out to fit it
+// entirely within the screen. galaxyW and galaxyH are the map extents in
+// galaxy units.
+func NewCamera(screenW, screenH, galaxyW, galaxyH float32) Camera {
+	// Fit-to-screen zoom: the smaller of the two axis ratios ensures the whole
+	// map is visible with a small margin.
+	fitZoom := float32(math.Min(
+		float64(screenW/galaxyW),
+		float64(screenH/galaxyH),
+	)) * 0.9
+	if fitZoom < 0.001 {
+		fitZoom = 0.001
+	}
+	c := Camera{
+		CenterX: galaxyW / 2,
+		CenterY: galaxyH / 2,
+		Zoom:    fitZoom,
+		logZoom: float32(math.Log(float64(fitZoom))),
 		ScreenW: screenW,
 		ScreenH: screenH,
 	}
+	// Recompute logMin so the player can always zoom out to fit-zoom.
+	logMin = float32(math.Log(float64(fitZoom)))
+	return c
 }
 
 // GalaxyToScreen converts galaxy-space coordinates to screen pixels.

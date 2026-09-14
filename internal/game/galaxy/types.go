@@ -1,5 +1,31 @@
 package galaxy
 
+// GalaxySize is the named size tier for a generated galaxy.
+type GalaxySize string
+
+const (
+	GalaxySizeSmall   GalaxySize = "small"
+	GalaxySizeMedium  GalaxySize = "medium"
+	GalaxySizeLarge   GalaxySize = "large"
+	GalaxySizeCluster GalaxySize = "cluster"
+	GalaxySizeHuge    GalaxySize = "huge"
+)
+
+// galaxySizeParams holds the canonical parameters for each galaxy size.
+type galaxySizeParams struct {
+	StarCount int
+	Width     float32
+	Height    float32
+}
+
+var sizeParams = map[GalaxySize]galaxySizeParams{
+	GalaxySizeSmall:   {StarCount: 280, Width: 7084, Height: 5600},
+	GalaxySizeMedium:  {StarCount: 504, Width: 10626, Height: 8400},
+	GalaxySizeLarge:   {StarCount: 756, Width: 14168, Height: 11200},
+	GalaxySizeCluster: {StarCount: 1000, Width: 14168, Height: 11200},
+	GalaxySizeHuge:    {StarCount: 1000, Width: 21252, Height: 16800},
+}
+
 // SystemID is a typed index into Galaxy.Systems.
 type SystemID int
 
