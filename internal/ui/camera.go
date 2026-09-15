@@ -6,9 +6,10 @@ import "math"
 type ZoomTier int
 
 const (
-	ZoomFar   ZoomTier = iota // faction-colored territory blobs
-	ZoomMid                   // travel lanes + star discs
-	ZoomClose                 // names + planet count labels
+	ZoomFar    ZoomTier = iota // faction-colored territory blobs
+	ZoomMid                    // travel lanes + star discs
+	ZoomClose                  // names + planet count labels
+	ZoomSystem                 // system-detail view: star at centre, orbital rings
 )
 
 // Exported thresholds so tests and other packages can reason about tier
@@ -53,6 +54,9 @@ type Camera struct {
 	// zoomActive is true while the user is actively sending zoom input.
 	// The spring only fires once this is false.
 	zoomActive bool
+	// inSystem is true while the system-detail view is active. It makes
+	// Tier() stable against the user scrolling near the ZoomMax boundary.
+	inSystem bool
 }
 
 // NewCamera returns a Camera centred on the galaxy and zoomed out to fit it
@@ -97,6 +101,9 @@ func (c Camera) ScreenToGalaxy(sx, sy float32) (gx, gy float32) {
 
 // Tier classifies the current zoom level.
 func (c Camera) Tier() ZoomTier {
+	if c.inSystem {
+		return ZoomSystem
+	}
 	switch {
 	case c.Zoom < ZoomMidThreshold:
 		return ZoomFar
@@ -106,6 +113,23 @@ func (c Camera) Tier() ZoomTier {
 		return ZoomClose
 	}
 }
+
+// EnterSystem transitions to the ZoomSystem tier. It stops any active zoom
+// animation so the spring does not interfere while in system view.
+func (c *Camera) EnterSystem() {
+	c.zoomVel = 0
+	c.zoomActive = false
+	c.logZoom = logMax
+	c.Zoom = ZoomMax
+	c.inSystem = true
+}
+
+// ExitSystem returns to ZoomClose. The camera centre is already on the system
+// so no pan is needed.
+func (c *Camera) ExitSystem() { c.inSystem = false }
+
+// InSystem reports whether the system-detail view is active.
+func (c Camera) InSystem() bool { return c.inSystem }
 
 // logMin and logMax are the hard limits in log-space.
 var (

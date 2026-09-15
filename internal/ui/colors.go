@@ -61,3 +61,33 @@ func LaneColor(tier ZoomTier) sdl.FColor {
 func BackgroundColor() sdl.FColor {
 	return sdl.FColor{R: 0.02, G: 0.02, B: 0.08, A: 1.0}
 }
+
+// PlanetColor maps a planet class string to a visual color for the system view.
+func PlanetColor(class string) sdl.FColor {
+	switch class {
+	case "terran":
+		return sdl.FColor{R: 0.2, G: 0.6, B: 0.2, A: 1.0}
+	case "ocean":
+		return sdl.FColor{R: 0.1, G: 0.4, B: 0.9, A: 1.0}
+	case "arid":
+		return sdl.FColor{R: 0.8, G: 0.6, B: 0.2, A: 1.0}
+	case "desert":
+		return sdl.FColor{R: 0.9, G: 0.8, B: 0.3, A: 1.0}
+	case "tundra":
+		return sdl.FColor{R: 0.6, G: 0.7, B: 0.8, A: 1.0}
+	case "swamp":
+		return sdl.FColor{R: 0.3, G: 0.5, B: 0.2, A: 1.0}
+	case "volcanic":
+		return sdl.FColor{R: 0.8, G: 0.2, B: 0.0, A: 1.0}
+	case "barren":
+		return sdl.FColor{R: 0.5, G: 0.5, B: 0.5, A: 1.0}
+	case "radiated":
+		return sdl.FColor{R: 0.6, G: 0.9, B: 0.3, A: 1.0}
+	case "toxic":
+		return sdl.FColor{R: 0.5, G: 0.2, B: 0.6, A: 1.0}
+	case "inferno":
+		return sdl.FColor{R: 1.0, G: 0.3, B: 0.0, A: 1.0}
+	default:
+		return sdl.FColor{R: 0.4, G: 0.4, B: 0.4, A: 1.0}
+	}
+}

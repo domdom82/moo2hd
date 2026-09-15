@@ -43,6 +43,7 @@ func main() {
 	defer font.Close()
 	sm := ui.NewStarMap(g, cam, font)
 	ih := ui.NewInputHandler(sm.Camera(), glxOpt.Width, glxOpt.Height)
+	sm.Bind(ih)
 
 	lastTick := sdl.Ticks()
 
@@ -59,6 +60,7 @@ func main() {
 		}
 
 		ih.Update(dt)
+		sm.Update(dt)
 		return sm.Draw(renderer)
 	})
 }

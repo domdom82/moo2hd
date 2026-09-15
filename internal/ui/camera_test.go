@@ -62,6 +62,55 @@ var _ = Describe("Camera", func() {
 		})
 	})
 
+	Describe("ZoomSystem tier", func() {
+		It("returns ZoomClose at ZoomMax before EnterSystem", func() {
+			cam := ui.NewCamera(1920, 1080, 1000, 1000)
+			cam.Zoom = ui.ZoomMax
+			Expect(cam.Tier()).To(Equal(ui.ZoomClose))
+		})
+
+		It("returns ZoomSystem after EnterSystem regardless of Zoom value", func() {
+			cam := ui.NewCamera(1920, 1080, 1000, 1000)
+			cam.EnterSystem()
+			cam.Zoom = 0.1 // well below any tier threshold
+			Expect(cam.Tier()).To(Equal(ui.ZoomSystem))
+		})
+
+		It("returns ZoomClose after ExitSystem", func() {
+			cam := ui.NewCamera(1920, 1080, 1000, 1000)
+			cam.Zoom = ui.ZoomMax
+			cam.EnterSystem()
+			cam.ExitSystem()
+			Expect(cam.Tier()).To(Equal(ui.ZoomClose))
+		})
+
+		It("EnterSystem freezes zoom — UpdateZoom does not change Zoom afterward", func() {
+			cam := ui.NewCamera(1920, 1080, 1000, 1000)
+			cam.ZoomIn() // add some velocity
+			cam.EnterSystem()
+			cam.UpdateZoom(0.1)
+			Expect(cam.Zoom).To(BeNumerically("~", ui.ZoomMax, 0.001))
+		})
+
+		It("InSystem returns false before EnterSystem", func() {
+			cam := ui.NewCamera(1920, 1080, 1000, 1000)
+			Expect(cam.InSystem()).To(BeFalse())
+		})
+
+		It("InSystem returns true after EnterSystem", func() {
+			cam := ui.NewCamera(1920, 1080, 1000, 1000)
+			cam.EnterSystem()
+			Expect(cam.InSystem()).To(BeTrue())
+		})
+
+		It("InSystem returns false after ExitSystem", func() {
+			cam := ui.NewCamera(1920, 1080, 1000, 1000)
+			cam.EnterSystem()
+			cam.ExitSystem()
+			Expect(cam.InSystem()).To(BeFalse())
+		})
+	})
+
 	Describe("ZoomIn / ZoomOut", func() {
 		It("does not exceed ZoomMax after many ZoomIn calls", func() {
 			cam := ui.NewCamera(1920, 1080, 1000, 1000)

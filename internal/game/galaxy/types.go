@@ -18,6 +18,8 @@ type galaxySizeParams struct {
 	Height    float32
 }
 
+const GalaxyAspectRatio = 1.265 // width / height
+
 var sizeParams = map[GalaxySize]galaxySizeParams{
 	GalaxySizeSmall:   {StarCount: 280, Width: 7084, Height: 5600},
 	GalaxySizeMedium:  {StarCount: 504, Width: 10626, Height: 8400},
@@ -36,13 +38,13 @@ type PlanetID int
 type StarType string
 
 const (
-	StarYellow   StarType = "yellow"
-	StarBlue     StarType = "blue"
-	StarWhite    StarType = "white"
-	StarOrange   StarType = "orange"
-	StarRed      StarType = "red"
-	StarBrown    StarType = "brown"
-	StarNeutron  StarType = "neutron"
+	StarYellow    StarType = "yellow"
+	StarBlue      StarType = "blue"
+	StarWhite     StarType = "white"
+	StarOrange    StarType = "orange"
+	StarRed       StarType = "red"
+	StarBrown     StarType = "brown"
+	StarNeutron   StarType = "neutron"
 	StarBlackHole StarType = "black_hole"
 )
 
@@ -93,17 +95,17 @@ type System struct {
 	Star       StarType
 	Size       SystemSize
 	Planets    []PlanetID
-	Faction    int     // 0-based faction index; -1 = unclaimed
-	Special    Special // optional special property
+	Faction    int      // 0-based faction index; -1 = unclaimed
+	Special    Special  // optional special property
 	WormholeTo SystemID // partner system ID for wormholes; -1 if none
 }
 
 // Galaxy is the complete procedurally-generated star map.
 type Galaxy struct {
-	Seed       uint64
-	Systems    []System
-	Planets    []Planet
-	Adjacency  [][]Lane // indexed by SystemID
+	Seed         uint64
+	Systems      []System
+	Planets      []Planet
+	Adjacency    [][]Lane // indexed by SystemID
 	systemByName map[string]SystemID
 }
 

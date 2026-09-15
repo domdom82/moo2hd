@@ -4,6 +4,7 @@ import (
 	"math"
 
 	"github.com/Zyko0/go-sdl3/sdl"
+	"github.com/domdom82/moo2hd/internal/game/galaxy"
 )
 
 const (
@@ -19,6 +20,17 @@ const (
 	// zoomInputTimeout is how long (seconds) after the last zoom event before
 	// the camera treats input as released and allows the spring to activate.
 	zoomInputTimeout = float32(0.15)
+
+	// clickStarRadius is the screen-pixel hit radius for star click detection.
+	clickStarRadius float32 = 12.0
+
+	// scrollCenterRadius is the screen-pixel radius of the center hitbox used
+	// to detect a nearby star when the player scrolls in past ZoomMax.
+	scrollCenterRadius float32 = 100.0
+
+	// clickDragThreshold is the maximum pixel distance between mouse-down and
+	// mouse-up that is still classified as a click (not a drag).
+	clickDragThreshold float32 = 5.0
 )
 
 // InputHandler translates SDL events into Camera mutations.
@@ -29,6 +41,21 @@ type InputHandler struct {
 	lastX, lastY     float32
 	velX, velY       float32 // pan momentum in screen-pixels per second
 	zoomIdleFor      float32 // seconds since last zoom input
+
+	mouseDownX, mouseDownY float32
+	mouseDownSet           bool
+
+	// FindSystemAtScreen is set by StarMap. Returns the nearest system within
+	// radius screen-px of (sx, sy), or -1/false if none.
+	FindSystemAtScreen func(sx, sy, radius float32) (galaxy.SystemID, bool)
+
+	// OnSystemEnter is set by StarMap. Called when a star click or scroll-in
+	// gesture targets the given system.
+	OnSystemEnter func(sysID galaxy.SystemID)
+
+	// OnSystemExit is set by StarMap. Called when the player scrolls out of
+	// the system-detail view.
+	OnSystemExit func()
 }
 
 // NewInputHandler creates an InputHandler that mutates cam.
@@ -88,12 +115,23 @@ func (h *InputHandler) Handle(event *sdl.Event) error {
 		if evt.Button == uint8(sdl.BUTTON_LEFT) {
 			h.dragging = true
 			h.lastX, h.lastY = evt.X, evt.Y
+			h.mouseDownX, h.mouseDownY = evt.X, evt.Y
+			h.mouseDownSet = true
 			h.velX, h.velY = 0, 0
 		}
 
 	case sdl.EVENT_MOUSE_BUTTON_UP:
-		if event.MouseButtonEvent().Button == uint8(sdl.BUTTON_LEFT) {
+		evt := event.MouseButtonEvent()
+		if evt.Button == uint8(sdl.BUTTON_LEFT) {
 			h.dragging = false
+			if h.mouseDownSet {
+				dx := evt.X - h.mouseDownX
+				dy := evt.Y - h.mouseDownY
+				if dx*dx+dy*dy <= clickDragThreshold*clickDragThreshold {
+					h.tryStarClick(evt.X, evt.Y)
+				}
+				h.mouseDownSet = false
+			}
 		}
 
 	case sdl.EVENT_MOUSE_MOTION:
@@ -111,9 +149,21 @@ func (h *InputHandler) Handle(event *sdl.Event) error {
 	case sdl.EVENT_MOUSE_WHEEL:
 		evt := event.MouseWheelEvent()
 		if evt.Y > 0 {
-			h.cam.ZoomIn()
+			if !h.cam.InSystem() && h.cam.Zoom >= ZoomMax-0.01 {
+				h.tryScrollIntoSystem()
+				// Do not call cam.ZoomIn(): the transition handles zoom state.
+			} else {
+				h.cam.ZoomIn()
+			}
 		} else if evt.Y < 0 {
-			h.cam.ZoomOut()
+			if h.cam.InSystem() {
+				h.cam.ExitSystem()
+				if h.OnSystemExit != nil {
+					h.OnSystemExit()
+				}
+			} else {
+				h.cam.ZoomOut()
+			}
 		}
 		h.zoomIdleFor = 0 // reset timeout so spring stays dormant while scrolling
 		h.cam.Clamp(h.galaxyW, h.galaxyH)
@@ -135,11 +185,22 @@ func (h *InputHandler) handleKey(evt *sdl.KeyboardEvent) error {
 	case sdl.SCANCODE_DOWN, sdl.SCANCODE_S:
 		h.cam.Pan(0, step)
 	case sdl.SCANCODE_EQUALS, sdl.SCANCODE_KP_PLUS:
-		h.cam.ZoomIn()
-		h.zoomIdleFor = 0
+		if !h.cam.InSystem() && h.cam.Zoom >= ZoomMax-0.01 {
+			h.tryScrollIntoSystem()
+		} else {
+			h.cam.ZoomIn()
+			h.zoomIdleFor = 0
+		}
 	case sdl.SCANCODE_MINUS, sdl.SCANCODE_KP_MINUS:
-		h.cam.ZoomOut()
-		h.zoomIdleFor = 0
+		if h.cam.InSystem() {
+			h.cam.ExitSystem()
+			if h.OnSystemExit != nil {
+				h.OnSystemExit()
+			}
+		} else {
+			h.cam.ZoomOut()
+			h.zoomIdleFor = 0
+		}
 	}
 	h.cam.Clamp(h.galaxyW, h.galaxyH)
 	return nil
@@ -152,5 +213,29 @@ func (h *InputHandler) handleKeyUp(evt *sdl.KeyboardEvent) {
 		// Force the timeout to expire immediately on key release so the spring
 		// engages without the 150 ms delay.
 		h.zoomIdleFor = zoomInputTimeout
+	}
+}
+
+// tryStarClick fires OnSystemEnter if the screen point (sx, sy) is within a
+// star's click hitbox. Called on left-button-up after a non-drag gesture.
+func (h *InputHandler) tryStarClick(sx, sy float32) {
+	if h.FindSystemAtScreen == nil || h.OnSystemEnter == nil {
+		return
+	}
+	if id, ok := h.FindSystemAtScreen(sx, sy, clickStarRadius); ok {
+		h.OnSystemEnter(id)
+	}
+}
+
+// tryScrollIntoSystem fires OnSystemEnter if a star is within the center
+// hitbox when the player scrolls in past ZoomMax.
+func (h *InputHandler) tryScrollIntoSystem() {
+	if h.FindSystemAtScreen == nil || h.OnSystemEnter == nil {
+		return
+	}
+	cx := h.cam.ScreenW / 2
+	cy := h.cam.ScreenH / 2
+	if id, ok := h.FindSystemAtScreen(cx, cy, scrollCenterRadius); ok {
+		h.OnSystemEnter(id)
 	}
 }
