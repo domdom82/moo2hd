@@ -222,14 +222,15 @@ This phase is the largest and is broken into sub-packages developed roughly in p
 | Far | Faction-colored Voronoi regions |
 | Mid | Colored star icons + travel lanes |
 | Close | System names, ship stack icons, planet count badges |
+| System | Full system view: star, orbiting planets with types and colony status |
 
 - LOD switch on scroll delta thresholds
 - Smooth animated transition between zoom levels
+- System zoom reached by clicking a star at Close level; planets are interactive (select to open colony screen)
 
 ### 5c — Screens
 
-- Star map (main view)
-- System / planet detail
+- Star map (main view, covers Far/Mid/Close/System zoom levels)
 - Colony management screen
 - Ship design screen
 - Research screen
