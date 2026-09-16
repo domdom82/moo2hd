@@ -57,6 +57,14 @@ type Camera struct {
 	// inSystem is true while the system-detail view is active. It makes
 	// Tier() stable against the user scrolling near the ZoomMax boundary.
 	inSystem bool
+
+	// zoomAnchorGX/GY is the galaxy-space point that should remain fixed under
+	// the cursor while a cursor-anchored zoom is in progress. anchorSX/SY are
+	// the corresponding screen coordinates. anchorActive is true when a cursor
+	// zoom is in progress.
+	anchorActive      bool
+	anchorSX, anchorSY float32
+	anchorGX, anchorGY float32
 }
 
 // NewCamera returns a Camera centred on the galaxy and zoomed out to fit it
@@ -144,15 +152,37 @@ var zoomImpulse = float32(math.Log(float64(1+zoomStep)) / (1 - math.Pow(float64(
 // ZoomIn adds a log-space impulse toward larger zoom values.
 // The zoom may temporarily exceed ZoomMax; it springs back once input stops.
 func (c *Camera) ZoomIn() {
-	c.zoomVel += zoomImpulse
-	c.zoomActive = true
+	c.ZoomBy(1.0)
 }
 
 // ZoomOut adds a log-space impulse toward smaller zoom values.
 // The zoom may temporarily go below ZoomMin; it springs back once input stops.
 func (c *Camera) ZoomOut() {
-	c.zoomVel -= zoomImpulse
+	c.ZoomBy(-1.0)
+}
+
+// ZoomBy adds a proportional zoom impulse. delta is in scroll-tick units:
+// a physical mouse wheel sends ±1.0; a trackpad sends many small fractions.
+// The impulse is scaled by delta but capped at one full tick so a fast trackpad
+// swipe doesn't feel faster than a mouse wheel click.
+func (c *Camera) ZoomBy(delta float32) {
+	if delta > 1.0 {
+		delta = 1.0
+	} else if delta < -1.0 {
+		delta = -1.0
+	}
+	c.zoomVel += zoomImpulse * delta
 	c.zoomActive = true
+}
+
+// ZoomToward zooms by delta tick-units while keeping the galaxy point currently
+// under screen position (sx, sy) fixed. The anchor is refreshed on every call
+// so continuous trackpad input stays locked to the cursor position.
+func (c *Camera) ZoomToward(delta, sx, sy float32) {
+	c.anchorSX, c.anchorSY = sx, sy
+	c.anchorGX, c.anchorGY = c.ScreenToGalaxy(sx, sy)
+	c.anchorActive = true
+	c.ZoomBy(delta)
 }
 
 // ZoomInputDone signals that the user has released the scroll wheel or zoom
@@ -231,6 +261,20 @@ func (c *Camera) UpdateZoom(dt float32) {
 	}
 
 	c.Zoom = float32(math.Exp(float64(c.logZoom)))
+
+	// If a cursor anchor is active, pan so the anchored galaxy point stays
+	// under the same screen position.
+	if c.anchorActive {
+		// Where would anchorGX/GY land on screen at the new zoom?
+		// GalaxyToScreen: sx = (gx - cx) * z + screenW/2
+		// Solve for cx so that maps to anchorSX:
+		// cx = anchorGX - (anchorSX - screenW/2) / z
+		c.CenterX = c.anchorGX - (c.anchorSX-c.ScreenW/2)/c.Zoom
+		c.CenterY = c.anchorGY - (c.anchorSY-c.ScreenH/2)/c.Zoom
+		if c.zoomVel*c.zoomVel < 0.001 && !c.isOvershot() {
+			c.anchorActive = false
+		}
+	}
 }
 
 // isOvershot reports whether logZoom is currently outside the hard limits.

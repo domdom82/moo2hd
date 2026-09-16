@@ -56,6 +56,14 @@ type InputHandler struct {
 	// OnSystemExit is set by StarMap. Called when the player scrolls out of
 	// the system-detail view.
 	OnSystemExit func()
+
+	// FindPlanetAtScreen is set by StarMap. Returns the planet disc hit by
+	// (sx, sy) in the ZoomSystem view, or -1/false if none.
+	FindPlanetAtScreen func(sx, sy float32) (galaxy.PlanetID, bool)
+
+	// OnPlanetClick is set by StarMap. Called when the player clicks a planet
+	// disc in the ZoomSystem view.
+	OnPlanetClick func(pid galaxy.PlanetID)
 }
 
 // NewInputHandler creates an InputHandler that mutates cam.
@@ -148,21 +156,25 @@ func (h *InputHandler) Handle(event *sdl.Event) error {
 
 	case sdl.EVENT_MOUSE_WHEEL:
 		evt := event.MouseWheelEvent()
-		if evt.Y > 0 {
+		y := evt.Y
+		if evt.Direction == sdl.MOUSEWHEEL_FLIPPED {
+			y = -y
+		}
+		if y > 0 {
 			if !h.cam.InSystem() && h.cam.Zoom >= ZoomMax-0.01 {
 				h.tryScrollIntoSystem()
-				// Do not call cam.ZoomIn(): the transition handles zoom state.
+				// Do not call ZoomToward(): the transition handles zoom state.
 			} else {
-				h.cam.ZoomIn()
+				h.cam.ZoomToward(y, evt.MouseX, evt.MouseY)
 			}
-		} else if evt.Y < 0 {
+		} else if y < 0 {
 			if h.cam.InSystem() {
 				h.cam.ExitSystem()
 				if h.OnSystemExit != nil {
 					h.OnSystemExit()
 				}
 			} else {
-				h.cam.ZoomOut()
+				h.cam.ZoomToward(y, evt.MouseX, evt.MouseY)
 			}
 		}
 		h.zoomIdleFor = 0 // reset timeout so spring stays dormant while scrolling
@@ -217,13 +229,29 @@ func (h *InputHandler) handleKeyUp(evt *sdl.KeyboardEvent) {
 }
 
 // tryStarClick fires OnSystemEnter if the screen point (sx, sy) is within a
-// star's click hitbox. Called on left-button-up after a non-drag gesture.
+// star's click hitbox. In ZoomSystem, routes to tryPlanetClick instead.
+// Called on left-button-up after a non-drag gesture.
 func (h *InputHandler) tryStarClick(sx, sy float32) {
+	if h.cam.InSystem() {
+		h.tryPlanetClick(sx, sy)
+		return
+	}
 	if h.FindSystemAtScreen == nil || h.OnSystemEnter == nil {
 		return
 	}
 	if id, ok := h.FindSystemAtScreen(sx, sy, clickStarRadius); ok {
 		h.OnSystemEnter(id)
+	}
+}
+
+// tryPlanetClick fires OnPlanetClick if (sx, sy) hits a planet disc in the
+// ZoomSystem view.
+func (h *InputHandler) tryPlanetClick(sx, sy float32) {
+	if h.FindPlanetAtScreen == nil || h.OnPlanetClick == nil {
+		return
+	}
+	if pid, ok := h.FindPlanetAtScreen(sx, sy); ok {
+		h.OnPlanetClick(pid)
 	}
 }
 
