@@ -5,6 +5,7 @@ import (
 	"math"
 
 	"github.com/Zyko0/go-sdl3/sdl"
+	"github.com/domdom82/moo2hd/internal/game/colony"
 	"github.com/domdom82/moo2hd/internal/game/galaxy"
 )
 
@@ -43,11 +44,30 @@ type StarMap struct {
 	panActive              bool
 	zoomToMax              bool // true when navigate-in should also zoom to ZoomMax
 	panOnComplete          func()
+
+	// planetScreenPos caches each planet disc's screen-space centre, populated
+	// every drawSystem call so hit-testing can find the right planet on click.
+	planetScreenPos map[galaxy.PlanetID][2]float32
+
+	// Colony screen state.
+	activeColony  *ColonyScreen
+	colonyManager *colony.Manager
+	localRace     string
+
+	// systemFactionCounts maps each system to a faction → planet-count table,
+	// computed from colony ownership. Used by drawFar for pie-arc blobs.
+	systemFactionCounts map[galaxy.SystemID]map[int]int
 }
 
 // NewStarMap creates a StarMap for the given galaxy.
 func NewStarMap(g *galaxy.Galaxy, cam Camera, font *FontManager) *StarMap {
-	return &StarMap{g: g, cam: cam, font: font, focusedSystem: -1}
+	return &StarMap{
+		g:               g,
+		cam:             cam,
+		font:            font,
+		focusedSystem:   -1,
+		planetScreenPos: make(map[galaxy.PlanetID][2]float32),
+	}
 }
 
 // Camera returns a pointer to the embedded Camera so InputHandler can mutate
@@ -56,8 +76,9 @@ func (sm *StarMap) Camera() *Camera {
 	return &sm.cam
 }
 
-// Bind attaches InputHandler callbacks so StarMap can respond to star click
-// and scroll-into-system gestures. Call once after both sm and ih are created.
+// Bind attaches InputHandler callbacks so StarMap can respond to star click,
+// scroll-into-system, and planet click gestures. Call once after both sm and
+// ih are created.
 func (sm *StarMap) Bind(ih *InputHandler) {
 	ih.FindSystemAtScreen = sm.findSystemAtScreen
 	ih.OnSystemEnter = sm.beginEnterSystem
@@ -66,6 +87,8 @@ func (sm *StarMap) Bind(ih *InputHandler) {
 		sm.panActive = false
 		sm.zoomToMax = false
 	}
+	ih.FindPlanetAtScreen = sm.findPlanetAtScreen
+	ih.OnPlanetClick = sm.handlePlanetClick
 }
 
 // Update advances per-frame animations (pan toward system). Call once per frame.
@@ -145,6 +168,87 @@ func (sm *StarMap) findSystemAtScreen(sx, sy, radius float32) (galaxy.SystemID, 
 	return best, best >= 0
 }
 
+// findPlanetAtScreen returns the PlanetID whose disc centre is closest to
+// (sx, sy) and within its hit radius. Uses the positions cached by the most
+// recent drawSystem call.
+func (sm *StarMap) findPlanetAtScreen(sx, sy float32) (galaxy.PlanetID, bool) {
+	best := galaxy.PlanetID(-1)
+	bestDist2 := float32(math.MaxFloat32)
+	for pid, pos := range sm.planetScreenPos {
+		p := sm.g.Planet(pid)
+		hitR := sysPlanetBaseRadius + float32(p.Size-1)*sysPlanetRadiusPerSize + 4
+		dx := sx - pos[0]
+		dy := sy - pos[1]
+		d2 := dx*dx + dy*dy
+		if d2 <= hitR*hitR && d2 < bestDist2 {
+			bestDist2 = d2
+			best = pid
+		}
+	}
+	return best, best >= 0
+}
+
+// handlePlanetClick opens the colony screen if the clicked planet has a colony
+// owned by the local player; otherwise does nothing.
+func (sm *StarMap) handlePlanetClick(pid galaxy.PlanetID) {
+	if sm.colonyManager == nil {
+		return
+	}
+	c := sm.colonyManager.ColonyForPlanet(int(pid))
+	if c == nil || c.OwnerRace != sm.localRace {
+		return
+	}
+	p := sm.g.Planet(pid)
+	sys := sm.g.System(p.SystemID)
+	cs := NewColonyScreen(c, p, sys, sm.font)
+	cs.OnClose = func() { sm.activeColony = nil }
+	sm.activeColony = cs
+}
+
+// SetColonyData provides the colony manager and local player race to StarMap
+// so planet clicks can look up ownership and faction blobs can show mixed colours.
+func (sm *StarMap) SetColonyData(mgr *colony.Manager, localRace string) {
+	sm.colonyManager = mgr
+	sm.localRace = localRace
+
+	// Build per-system faction → planet count index.
+	counts := make(map[galaxy.SystemID]map[int]int)
+	for _, c := range mgr.Colonies {
+		f := factionForRace(c.OwnerRace)
+		if counts[c.SystemID] == nil {
+			counts[c.SystemID] = make(map[int]int)
+		}
+		counts[c.SystemID][f]++
+	}
+	sm.systemFactionCounts = counts
+}
+
+// factionForRace converts a race name back to a faction index for display.
+// "human" → 0; "faction-N" → N; anything else → 0.
+func factionForRace(race string) int {
+	if race == "human" {
+		return 0
+	}
+	var n int
+	fmt.Sscanf(race, "faction-%d", &n)
+	return n
+}
+
+// HasActiveScreen returns true when a modal screen (e.g. colony management)
+// is open and should consume all input.
+func (sm *StarMap) HasActiveScreen() bool {
+	return sm.activeColony != nil
+}
+
+// HandleScreen forwards an SDL event to the currently active modal screen.
+// Returns an error only when the application should quit.
+func (sm *StarMap) HandleScreen(event *sdl.Event) error {
+	if sm.activeColony != nil {
+		return sm.activeColony.Handle(event)
+	}
+	return nil
+}
+
 // beginEnterSystem is the OnSystemEnter callback. It pans to the star and
 // zooms to ZoomMax, then opens the system view. Works from any zoom tier.
 func (sm *StarMap) beginEnterSystem(id galaxy.SystemID) {
@@ -163,11 +267,19 @@ func (sm *StarMap) beginEnterSystem(id galaxy.SystemID) {
 }
 
 // Draw clears the renderer, renders the star map at the current zoom tier,
-// then presents the frame.
+// then presents the frame. If a modal screen is active it is rendered instead
+// of the system view.
 func (sm *StarMap) Draw(r *sdl.Renderer) error {
 	bg := BackgroundColor()
 	r.SetDrawColorFloat(bg.R, bg.G, bg.B, bg.A)
 	r.Clear()
+
+	if sm.activeColony != nil {
+		if err := sm.activeColony.Draw(r); err != nil {
+			return err
+		}
+		return r.Present()
+	}
 
 	switch sm.cam.Tier() {
 	case ZoomFar:
@@ -184,8 +296,8 @@ func (sm *StarMap) Draw(r *sdl.Renderer) error {
 }
 
 // drawFar renders each system as a large semi-transparent filled circle
-// coloured by faction. Overlapping alpha circles give an organic territory
-// feel that approximates Voronoi regions.
+// coloured by faction ownership. Systems with mixed ownership are drawn as
+// proportional pie slices (one per faction present).
 func (sm *StarMap) drawFar(r *sdl.Renderer) {
 	const galaxyRadius = float32(60.0)
 	r.SetDrawBlendMode(sdl.BLENDMODE_BLEND)
@@ -196,9 +308,40 @@ func (sm *StarMap) drawFar(r *sdl.Renderer) {
 			continue
 		}
 		sx, sy := sm.cam.GalaxyToScreen(sys.X, sys.Y)
-		col := FactionColor(sys.Faction)
-		verts := buildCircleVertices(sx, sy, screenR, col)
-		r.RenderGeometry(nil, verts, circleIndices[:])
+
+		fCounts := sm.systemFactionCounts[sys.ID]
+		if len(fCounts) <= 1 {
+			// Single (or no) owning faction: fast path, solid circle.
+			col := FactionColor(sys.Faction)
+			verts := buildCircleVertices(sx, sy, screenR, col)
+			r.RenderGeometry(nil, verts, circleIndices[:])
+			continue
+		}
+
+		// Multiple factions: build sorted pie slices.
+		total := 0
+		for _, cnt := range fCounts {
+			total += cnt
+		}
+		// Sort by faction index for deterministic order.
+		factions := make([]int, 0, len(fCounts))
+		for f := range fCounts {
+			factions = append(factions, f)
+		}
+		for i := 1; i < len(factions); i++ {
+			for j := i; j > 0 && factions[j] < factions[j-1]; j-- {
+				factions[j], factions[j-1] = factions[j-1], factions[j]
+			}
+		}
+		slices := make([]pieSlice, len(factions))
+		for i, f := range factions {
+			slices[i] = pieSlice{
+				fraction: float32(fCounts[f]) / float32(total),
+				col:      FactionColor(f),
+			}
+		}
+		verts, indices := buildPieVertices(sx, sy, screenR, slices)
+		r.RenderGeometry(nil, verts, indices)
 	}
 }
 
@@ -310,6 +453,7 @@ func (sm *StarMap) drawSystem(r *sdl.Renderer) {
 		verts := buildCircleVertices(px, py, pRadius, col)
 		r.SetDrawBlendMode(sdl.BLENDMODE_NONE)
 		r.RenderGeometry(nil, verts, circleIndices[:])
+		sm.planetScreenPos[pid] = [2]float32{px, py}
 	}
 
 	// System name above the star.

@@ -66,6 +66,16 @@ func (m *Manager) ApplyGroupToColonies(g *ColonyGroup) {
 	}
 }
 
+// ColonyForPlanet returns the colony on the given planet, or nil if none.
+func (m *Manager) ColonyForPlanet(planetID int) *Colony {
+	for _, c := range m.Colonies {
+		if int(c.PlanetID) == planetID {
+			return c
+		}
+	}
+	return nil
+}
+
 func colonySharesTag(c *Colony, g *ColonyGroup) bool {
 	for _, ct := range c.Tags {
 		for _, gt := range g.Tags {
