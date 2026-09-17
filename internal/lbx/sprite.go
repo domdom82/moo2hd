@@ -15,7 +15,11 @@ const (
 	FlagFillBackground  uint16 = 0x0400
 	FlagFunctionalColor uint16 = 0x0800
 	FlagInternalPalette uint16 = 0x1000 // embedded palette follows the frame-offset table
-	FlagJunction        uint16 = 0x2000
+	FlagJunction        uint16 = 0x2000 // palette entries are placed at PaletteJunctionOffset, ignoring baseIdx
+
+	// PaletteJunctionOffset is the palette index where FlagJunction records are overlaid.
+	// MOO2 reserves indices 0..191 for the base palette and loads faction/context palettes at 192+.
+	PaletteJunctionOffset = 192
 )
 
 // SpriteHeader is the decoded fixed portion of a MOO2 sprite record.
@@ -77,7 +81,7 @@ func DecodeFrames(data []byte, extPalette color.Palette) ([]image.Image, error) 
 	// Resolve palette.
 	var pal color.Palette
 	if hdr.Flags&FlagInternalPalette != 0 {
-		pal, err = readInternalPalette(data, offsetsEnd)
+		pal, err = readInternalPalette(data, offsetsEnd, hdr.Flags)
 		if err != nil {
 			return nil, err
 		}
@@ -99,14 +103,32 @@ func DecodeFrames(data []byte, extPalette color.Palette) ([]image.Image, error) 
 	return images, nil
 }
 
+// ExtractInternalPalette returns the embedded palette from a sprite record that has
+// FlagInternalPalette set. Returns an error if the flag is absent or the data is malformed.
+func ExtractInternalPalette(data []byte) (color.Palette, error) {
+	hdr, err := ParseSpriteHeader(data)
+	if err != nil {
+		return nil, err
+	}
+	if hdr.Flags&FlagInternalPalette == 0 {
+		return nil, fmt.Errorf("lbx: sprite record has no internal palette")
+	}
+	offsetsEnd := spriteHeaderLen + (int(hdr.FrameCount)+1)*4
+	return readInternalPalette(data, offsetsEnd, hdr.Flags)
+}
+
 // readInternalPalette reads the partial embedded palette that follows the frame-offset table.
 // It returns a full 256-entry palette; entries outside the stored range are zero/transparent.
-func readInternalPalette(data []byte, afterOffsets int) (color.Palette, error) {
+// When FlagJunction is set the entries are placed at PaletteJunctionOffset regardless of baseIdx.
+func readInternalPalette(data []byte, afterOffsets int, flags uint16) (color.Palette, error) {
 	if len(data) < afterOffsets+4 {
 		return nil, fmt.Errorf("lbx: data too short for internal palette header")
 	}
 	baseIdx := int(binary.LittleEndian.Uint16(data[afterOffsets : afterOffsets+2]))
 	count := int(binary.LittleEndian.Uint16(data[afterOffsets+2 : afterOffsets+4]))
+	if flags&FlagJunction != 0 {
+		baseIdx = PaletteJunctionOffset
+	}
 	rawStart := afterOffsets + 4
 	rawEnd := rawStart + count*4
 	if len(data) < rawEnd {

@@ -3,28 +3,29 @@
 // It is designed to chain with lbxextract:
 //
 //	lbxextract --extract assets/SHIPS.LBX
-//	svgconvert --out-dir out/ SHIPS_*.lbx
+//	svgconvert --assets assets/ --out-dir out/ SHIPS_*.lbx
 //
 // Each input file is treated as a raw MOO2 sprite record (a payload extracted by
 // lbxextract). For each animation frame a separate SVG is written:
 //
 //	<stem>_frame<N>.svg
 //
-// If the sprite record uses an external palette (no embedded palette), supply one
-// with --palette pointing to the extracted palette record file.
+// If the sprite record uses an external palette (no embedded palette), the full
+// MOO2 palette is loaded automatically from BUFFER0.LBX in --assets. Alternatively,
+// supply a single extracted palette record with --palette.
 //
 // Usage:
 //
-//	svgconvert [--palette <file>] [--out-dir <dir>] <sprite.lbx> [...]
+//	svgconvert [--assets <dir>] [--palette <file>] [--out-dir <dir>] <sprite.lbx> [...]
 //
 // Flags:
 //
-//	--palette   Path to an extracted palette record file (raw 256-entry VGA palette)
+//	--assets    Directory containing BUFFER0.LBX for the full merged palette (default: assets/)
+//	--palette   Path to an extracted palette record file (overrides --assets)
 //	--out-dir   Directory to write SVG files (default: current directory)
 package main
 
 import (
-	"encoding/binary"
 	"flag"
 	"fmt"
 	"image/color"
@@ -37,10 +38,11 @@ import (
 )
 
 func main() {
-	palettePath := flag.String("palette", "", "path to extracted palette record file (256 × 3-byte VGA RGB)")
+	assetsDir := flag.String("assets", "assets/", "directory containing BUFFER0.LBX for the full merged palette")
+	palettePath := flag.String("palette", "", "path to extracted palette record file (overrides --assets)")
 	outDir := flag.String("out-dir", ".", "directory to write SVG files")
 	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, "Usage: svgconvert [--palette <file>] [--out-dir <dir>] <sprite.lbx> [...]\n")
+		fmt.Fprintf(os.Stderr, "Usage: svgconvert [--assets <dir>] [--palette <file>] [--out-dir <dir>] <sprite.lbx> [...]\n")
 		flag.PrintDefaults()
 	}
 	flag.Parse()
@@ -59,6 +61,14 @@ func main() {
 			os.Exit(1)
 		}
 		fmt.Printf("loaded external palette from %s\n", *palettePath)
+	} else {
+		var err error
+		extPalette, err = loadDefaultPalette(*assetsDir)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "warning: could not load palette from %s: %v\n", *assetsDir, err)
+		} else if extPalette != nil {
+			fmt.Printf("loaded merged palette from %s\n", filepath.Join(*assetsDir, "BUFFER0.LBX"))
+		}
 	}
 
 	if err := os.MkdirAll(*outDir, 0o755); err != nil {
@@ -121,6 +131,35 @@ func processSprite(path, outDir string, extPalette color.Palette, upscaler svg.X
 	return nil
 }
 
+// loadDefaultPalette builds a full 256-entry palette from BUFFER0.LBX by merging
+// the base palette (record 0, indices 0–191) with the first faction palette
+// (record 92, FlagJunction → indices 192–213).
+func loadDefaultPalette(assetsDir string) (color.Palette, error) {
+	buf0 := filepath.Join(assetsDir, "BUFFER0.LBX")
+	data, err := os.ReadFile(buf0)
+	if err != nil {
+		return nil, nil // assets not present — not fatal
+	}
+	arc, err := lbx.Parse(data)
+	if err != nil || len(arc.Records) < 93 {
+		return nil, err
+	}
+	base, err := lbx.ExtractInternalPalette(arc.Records[0].Data)
+	if err != nil {
+		return nil, err
+	}
+	faction, err := lbx.ExtractInternalPalette(arc.Records[92].Data)
+	if err != nil {
+		return base, nil
+	}
+	for i := lbx.PaletteJunctionOffset; i < 256; i++ {
+		if faction[i] != nil {
+			base[i] = faction[i]
+		}
+	}
+	return base, nil
+}
+
 // loadPalette reads a palette from a file. Supported formats:
 //   - 768 bytes: 256 × {R6, G6, B6}  (raw 6-bit VGA)
 //   - 1024 bytes: 256 × {A, R6, G6, B6}  (with leading alpha byte)
@@ -151,25 +190,7 @@ func loadPalette(path string) (color.Palette, error) {
 // embedded palette when FlagInternalPalette is set. Returns an error if the record
 // doesn't carry a palette (so the caller can fall back to other formats).
 func extractPaletteFromSpriteRecord(data []byte) (color.Palette, error) {
-	hdr, err := lbx.ParseSpriteHeader(data)
-	if err != nil {
-		return nil, err
-	}
-	if hdr.Flags&lbx.FlagInternalPalette == 0 {
-		return nil, fmt.Errorf("sprite record has no internal palette")
-	}
-	// Skip past the frame-offset table to reach the palette section.
-	offsetsEnd := 12 + (int(hdr.FrameCount)+1)*4
-	if len(data) < offsetsEnd+4 {
-		return nil, fmt.Errorf("data too short for palette header")
-	}
-	baseIdx := int(binary.LittleEndian.Uint16(data[offsetsEnd : offsetsEnd+2]))
-	count := int(binary.LittleEndian.Uint16(data[offsetsEnd+2 : offsetsEnd+4]))
-	rawStart := offsetsEnd + 4
-	if len(data) < rawStart+count*4 {
-		return nil, fmt.Errorf("data too short for palette entries")
-	}
-	return decodeMOO2Palette(data[rawStart:rawStart+count*4], baseIdx, count), nil
+	return lbx.ExtractInternalPalette(data)
 }
 
 // decodeRawPalette decodes a flat VGA palette where stride is 3 (R,G,B) or 4 (A,R,G,B).
@@ -186,25 +207,6 @@ func decodeRawPalette(raw []byte, stride int) color.Palette {
 			R: raw[offset+rIdx] * 4,
 			G: raw[offset+gIdx] * 4,
 			B: raw[offset+bIdx] * 4,
-			A: 255,
-		}
-	}
-	return pal
-}
-
-// decodeMOO2Palette decodes a partial palette from MOO2 internal-palette raw bytes.
-func decodeMOO2Palette(raw []byte, baseIdx, count int) color.Palette {
-	pal := make(color.Palette, 256)
-	pal[0] = color.Transparent
-	for i := range count {
-		if baseIdx+i >= 256 {
-			break
-		}
-		// layout: alpha(skip), R6, G6, B6
-		pal[baseIdx+i] = color.RGBA{
-			R: raw[i*4+1] * 4,
-			G: raw[i*4+2] * 4,
-			B: raw[i*4+3] * 4,
 			A: 255,
 		}
 	}

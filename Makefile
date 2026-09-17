@@ -4,6 +4,7 @@ MODULE := github.com/domdom82/moo2hd
 GAME_BIN    := bin/moo2hd
 EXTRACT_BIN := bin/lbxextract
 CONVERT_BIN := bin/svgconvert
+EXPLORE_BIN := bin/lbxexplore
 
 # Cross-compile targets: OS/ARCH pairs
 PLATFORMS := \
@@ -23,7 +24,7 @@ GINKGO  := $(GO) run github.com/onsi/ginkgo/v2/ginkgo
 all: build
 
 ## Build both binaries for the current platform
-build: $(GAME_BIN) $(EXTRACT_BIN) $(CONVERT_BIN)
+build: $(GAME_BIN) $(EXTRACT_BIN) $(CONVERT_BIN) $(EXPLORE_BIN)
 
 $(GAME_BIN): cmd/moo2hd/main.go
 	@mkdir -p bin
@@ -36,6 +37,10 @@ $(EXTRACT_BIN): cmd/lbxextract/main.go
 $(CONVERT_BIN): cmd/svgconvert/main.go
 	@mkdir -p bin
 	$(GO) build -o $@ ./cmd/svgconvert
+
+$(EXPLORE_BIN): cmd/lbxexplore/main.go
+	@mkdir -p bin
+	$(GO) build -o $@ ./cmd/lbxexplore
 
 ## Run all tests via Ginkgo
 test:
@@ -65,9 +70,10 @@ $(PLATFORMS):
 	$(eval ARCH := $(word 2,$(subst /, ,$@)))
 	$(eval EXT  := $(if $(filter windows,$(OS)),.exe,))
 	@mkdir -p dist/$(OS)_$(ARCH)
-	GOOS=$(OS) GOARCH=$(ARCH) $(GO) build -o dist/$(OS)_$(ARCH)/moo2hd$(EXT)    ./cmd/moo2hd
-	GOOS=$(OS) GOARCH=$(ARCH) $(GO) build -o dist/$(OS)_$(ARCH)/lbxextract$(EXT) ./cmd/lbxextract
-	GOOS=$(OS) GOARCH=$(ARCH) $(GO) build -o dist/$(OS)_$(ARCH)/svgconvert$(EXT) ./cmd/svgconvert
+	GOOS=$(OS) GOARCH=$(ARCH) $(GO) build -o dist/$(OS)_$(ARCH)/moo2hd$(EXT)       ./cmd/moo2hd
+	GOOS=$(OS) GOARCH=$(ARCH) $(GO) build -o dist/$(OS)_$(ARCH)/lbxextract$(EXT)   ./cmd/lbxextract
+	GOOS=$(OS) GOARCH=$(ARCH) $(GO) build -o dist/$(OS)_$(ARCH)/svgconvert$(EXT)   ./cmd/svgconvert
+	GOOS=$(OS) GOARCH=$(ARCH) $(GO) build -o dist/$(OS)_$(ARCH)/lbxexplore$(EXT)   ./cmd/lbxexplore
 
 clean:
 	rm -rf bin/ dist/
