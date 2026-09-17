@@ -41,10 +41,11 @@ var factionColors = [8]sdl.FColor{
 }
 
 // FactionColor returns the territory color for a faction ID (0-based).
-// Wraps at 8.
+// Wraps at 8. Returns zero color for unclaimed (faction < 0) — callers should
+// skip rendering a territory disc in that case.
 func FactionColor(factionID int) sdl.FColor {
 	if factionID < 0 {
-		return sdl.FColor{R: 0.3, G: 0.3, B: 0.3, A: 0.3} // unclaimed
+		return sdl.FColor{}
 	}
 	return factionColors[factionID%len(factionColors)]
 }

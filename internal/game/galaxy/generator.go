@@ -169,6 +169,13 @@ func (g *Generator) assignFactions(systems []System) {
 		}
 		systems[i].Faction = best
 	}
+	// TEST: leave every other system unclaimed so the Far zoom level shows
+	// unclaimed stars. Remove this block when real colonisation logic exists.
+	for i := range systems {
+		if i%2 == 0 {
+			systems[i].Faction = -1
+		}
+	}
 }
 
 // assignSpecials rolls a special property for each system according to the

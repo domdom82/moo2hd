@@ -10,7 +10,7 @@ import (
 )
 
 // System view layout constants (screen pixels, 1080p reference).
-var sysOrbitRadii = [5]float32{90, 160, 240, 330, 430}
+var sysOrbitRadii = [5]float32{200, 280, 370, 470, 580}
 
 const (
 	sysStarRadius          float32 = 40.0
@@ -297,7 +297,8 @@ func (sm *StarMap) Draw(r *sdl.Renderer) error {
 
 // drawFar renders each system as a large semi-transparent filled circle
 // coloured by faction ownership. Systems with mixed ownership are drawn as
-// proportional pie slices (one per faction present).
+// proportional pie slices (one per faction present). Unclaimed stars are
+// rendered as small star discs so they remain visible.
 func (sm *StarMap) drawFar(r *sdl.Renderer) {
 	const galaxyRadius = float32(60.0)
 	r.SetDrawBlendMode(sdl.BLENDMODE_BLEND)
@@ -309,9 +310,12 @@ func (sm *StarMap) drawFar(r *sdl.Renderer) {
 		}
 		sx, sy := sm.cam.GalaxyToScreen(sys.X, sys.Y)
 
+		if sys.Faction < 0 {
+			continue // unclaimed: no territory disc; star disc drawn by drawStars
+		}
 		fCounts := sm.systemFactionCounts[sys.ID]
 		if len(fCounts) <= 1 {
-			// Single (or no) owning faction: fast path, solid circle.
+			// Single owning faction: fast path, solid circle.
 			col := FactionColor(sys.Faction)
 			verts := buildCircleVertices(sx, sy, screenR, col)
 			r.RenderGeometry(nil, verts, circleIndices[:])
@@ -343,6 +347,7 @@ func (sm *StarMap) drawFar(r *sdl.Renderer) {
 		verts, indices := buildPieVertices(sx, sy, screenR, slices)
 		r.RenderGeometry(nil, verts, indices)
 	}
+	sm.drawStars(r, 5.0)
 }
 
 // drawRegions draws the faction territory blobs (same as drawFar).
@@ -350,18 +355,19 @@ func (sm *StarMap) drawRegions(r *sdl.Renderer) {
 	sm.drawFar(r)
 }
 
-// drawMid renders faction regions, travel lanes, and small star discs.
+// drawMid renders faction regions, travel lanes, star discs, and system names.
 func (sm *StarMap) drawMid(r *sdl.Renderer) {
 	sm.drawRegions(r)
 	sm.drawLanes(r, ZoomMid)
 	sm.drawStars(r, 4.0)
+	sm.drawLabels(r, 4.0)
 }
 
 // drawClose renders lanes, stars, and system name/planet-count labels.
 func (sm *StarMap) drawClose(r *sdl.Renderer) {
 	sm.drawLanes(r, ZoomClose)
 	sm.drawStars(r, 5.0)
-	sm.drawLabels(r)
+	sm.drawLabels(r, 5.0)
 }
 
 func (sm *StarMap) drawLanes(r *sdl.Renderer, tier ZoomTier) {
@@ -385,11 +391,11 @@ func (sm *StarMap) drawStars(r *sdl.Renderer, baseRadius float32) {
 	r.SetDrawBlendMode(sdl.BLENDMODE_NONE)
 	for i := range sm.g.Systems {
 		sys := &sm.g.Systems[i]
-		if !sm.cam.Visible(sys.X, sys.Y, baseRadius*sm.cam.Zoom+4) {
+		radius := baseRadius * sm.cam.Zoom
+		if !sm.cam.Visible(sys.X, sys.Y, radius+4) {
 			continue
 		}
 		sx, sy := sm.cam.GalaxyToScreen(sys.X, sys.Y)
-		radius := baseRadius * sm.cam.Zoom
 		if radius < 2 {
 			radius = 2
 		}
@@ -399,17 +405,24 @@ func (sm *StarMap) drawStars(r *sdl.Renderer, baseRadius float32) {
 	}
 }
 
-func (sm *StarMap) drawLabels(r *sdl.Renderer) {
+func (sm *StarMap) drawLabels(r *sdl.Renderer, baseRadius float32) {
 	white := sdl.Color{R: 220, G: 220, B: 220, A: 255}
 	grey := sdl.Color{R: 140, G: 140, B: 160, A: 255}
+	const gap = float32(4)
+	const lineH = float32(16)
 	for i := range sm.g.Systems {
 		sys := &sm.g.Systems[i]
 		if !sm.cam.Visible(sys.X, sys.Y, 60) {
 			continue
 		}
 		sx, sy := sm.cam.GalaxyToScreen(sys.X, sys.Y)
-		sm.font.DrawText(sys.Name, sx-float32(len(sys.Name))*4, sy+10, white)
-		sm.font.DrawText(fmt.Sprintf("P:%d", len(sys.Planets)), sx-8, sy+26, grey)
+		starR := baseRadius * sm.cam.Zoom
+		if starR < 2 {
+			starR = 2
+		}
+		labelY := sy + starR + gap
+		sm.font.DrawText(sys.Name, sx-float32(len(sys.Name))*4, labelY, white)
+		sm.font.DrawText(fmt.Sprintf("P:%d", len(sys.Planets)), sx-8, labelY+lineH, grey)
 	}
 }
 
@@ -456,9 +469,9 @@ func (sm *StarMap) drawSystem(r *sdl.Renderer) {
 		sm.planetScreenPos[pid] = [2]float32{px, py}
 	}
 
-	// System name above the star.
+	// System name below the star.
 	white := sdl.Color{R: 220, G: 220, B: 220, A: 255}
-	sm.font.DrawText(sys.Name, cx-float32(len(sys.Name))*4, cy-sysStarRadius-20, white)
+	sm.font.DrawText(sys.Name, cx-float32(len(sys.Name))*4, cy+sysStarRadius+4, white)
 }
 
 // drawEllipse draws an unfilled ellipse outline using a 64-segment polyline.

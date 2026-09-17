@@ -217,12 +217,12 @@ This phase is the largest and is broken into sub-packages developed roughly in p
 
 ### 5b — Zoom Level System
 
-| Zoom Level | Content |
-|---|---|
-| Far | Faction-colored Voronoi regions |
-| Mid | Colored star icons + travel lanes |
-| Close | System names, ship stack icons, planet count badges |
-| System | Full system view: star, orbiting planets with types and colony status |
+| Zoom Level | Content                                                                        |
+|------------|--------------------------------------------------------------------------------|
+| Far        | Faction-colored Voronoi regions + small star discs (unclaimed stars visible)   |
+| Mid        | Faction regions + colored star icons + travel lanes + system names             |
+| Close      | Travel lanes + stars + system names + planet count badges + ship stack icons   |
+| System     | Full system view: star, orbiting planets with types and colony status          |
 
 - LOD switch on scroll delta thresholds
 - Smooth animated transition between zoom levels
