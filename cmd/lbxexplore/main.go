@@ -2,11 +2,12 @@
 //
 // Usage:
 //
-//	lbxexplore [--assets <dir>] <file.lbx>
+//	lbxexplore [--assets <dir>] [--configs <dir>] <file.lbx>
 //
 // Flags:
 //
-//	--assets   Directory containing BUFFER0.LBX for the external palette (default: assets/)
+//	--assets   Directory containing LBX files for palette loading (default: assets/)
+//	--configs  Directory containing YAML config files (default: configs/)
 package main
 
 import (
@@ -14,16 +15,18 @@ import (
 	"image/color"
 	"os"
 	"path/filepath"
+	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/domdom82/moo2hd/internal/config"
 	"github.com/domdom82/moo2hd/internal/lbx"
 )
 
 func main() {
 	assetsDir := "assets/"
+	configsDir := "configs/"
 	args := os.Args[1:]
 
-	// Simple manual flag parsing so we don't pull in flag package awkwardly alongside positional.
 	for i := 0; i < len(args); i++ {
 		switch args[i] {
 		case "--assets", "-assets":
@@ -34,14 +37,22 @@ func main() {
 			assetsDir = args[i+1]
 			args = append(args[:i], args[i+2:]...)
 			i--
+		case "--configs", "-configs":
+			if i+1 >= len(args) {
+				fmt.Fprintln(os.Stderr, "error: --configs requires a value")
+				os.Exit(1)
+			}
+			configsDir = args[i+1]
+			args = append(args[:i], args[i+2:]...)
+			i--
 		case "--help", "-h":
-			fmt.Fprintln(os.Stderr, "Usage: lbxexplore [--assets <dir>] <file.lbx>")
+			fmt.Fprintln(os.Stderr, "Usage: lbxexplore [--assets <dir>] [--configs <dir>] <file.lbx>")
 			os.Exit(0)
 		}
 	}
 
 	if len(args) != 1 {
-		fmt.Fprintln(os.Stderr, "Usage: lbxexplore [--assets <dir>] <file.lbx>")
+		fmt.Fprintln(os.Stderr, "Usage: lbxexplore [--assets <dir>] [--configs <dir>] <file.lbx>")
 		os.Exit(1)
 	}
 
@@ -58,10 +69,17 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Try to load the default external palette from BUFFER0.LBX.
-	palette, _ := loadDefaultPalette(assetsDir)
+	// Load config for per-record palette deps. Missing configs dir is not fatal.
+	var reg *config.Registry
+	if r, err := config.Load(configsDir, "mods/"); err == nil {
+		reg = r
+	}
 
-	model := NewAppModel(filepath.Base(path), arc, palette)
+	// Load fallback palette from BUFFER0.LBX.
+	fallback, _ := loadDefaultPalette(assetsDir)
+
+	lbxName := strings.ToUpper(filepath.Base(path))
+	model := NewAppModel(filepath.Base(path), arc, lbxName, assetsDir, reg, fallback)
 	p := tea.NewProgram(model, tea.WithAltScreen())
 	if _, err := p.Run(); err != nil {
 		fmt.Fprintf(os.Stderr, "error: %v\n", err)
@@ -90,10 +108,9 @@ func loadDefaultPalette(assetsDir string) (color.Palette, error) {
 		return nil, err
 	}
 
-	// Overlay faction 0 palette (record 92) at PaletteJunctionOffset.
 	faction, err := lbx.ExtractInternalPalette(arc.Records[92].Data)
 	if err != nil {
-		return base, nil // faction palette optional
+		return base, nil
 	}
 	for i := lbx.PaletteJunctionOffset; i < 256; i++ {
 		if faction[i] != nil {

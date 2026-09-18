@@ -1,5 +1,22 @@
 package config
 
+// LBXPaletteRef identifies a single palette record within an LBX archive.
+type LBXPaletteRef struct {
+	LBX    string `yaml:"lbx"`    // e.g. "FONTS.LBX"
+	Record int    `yaml:"record"` // zero-based record index
+}
+
+// LBXPaletteEntry maps a sprite record (identified by its source LBX and index)
+// to the ordered list of palette records needed to render it. Palettes are merged
+// in order: the first entry provides the base (indices 0–191), subsequent entries
+// overlay at their encoded baseIdx (typically the junction range 192+).
+type LBXPaletteEntry struct {
+	ID       string          `yaml:"id"`
+	LBX      string          `yaml:"lbx"`      // source LBX filename, e.g. "SHIPS.LBX"
+	Record   int             `yaml:"record"`   // zero-based record index of the sprite
+	Palettes []LBXPaletteRef `yaml:"palettes"` // palette sources, applied in order
+}
+
 // Race represents a playable or AI species.
 type Race struct {
 	ID          string      `yaml:"id"`

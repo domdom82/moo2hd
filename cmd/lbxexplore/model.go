@@ -11,7 +11,9 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/domdom82/moo2hd/internal/config"
 	"github.com/domdom82/moo2hd/internal/lbx"
+	"github.com/domdom82/moo2hd/internal/svg"
 )
 
 type appMode int
@@ -19,6 +21,7 @@ type appMode int
 const (
 	modeList    appMode = iota
 	modeExtract         // extract-dialog overlay is active
+	modeConvert         // convert-to-SVG dialog overlay is active
 )
 
 // soundDoneMsg is sent when the audio subprocess finishes.
@@ -28,7 +31,10 @@ type soundDoneMsg struct{ err error }
 type AppModel struct {
 	filename string
 	archive  *lbx.Archive
-	palette  color.Palette // may be nil
+	lbxName  string          // uppercase basename of the open LBX, e.g. "SHIPS.LBX"
+	assetsDir string
+	reg      *config.Registry // may be nil
+	palette  color.Palette    // fallback palette; may be nil
 
 	list  list.Model
 	input textinput.Model
@@ -57,7 +63,7 @@ func (ri recordItem) Description() string {
 }
 func (ri recordItem) FilterValue() string { return ri.r.Name }
 
-func NewAppModel(filename string, arc *lbx.Archive, palette color.Palette) AppModel {
+func NewAppModel(filename string, arc *lbx.Archive, lbxName, assetsDir string, reg *config.Registry, palette color.Palette) AppModel {
 	items := make([]list.Item, len(arc.Records))
 	for i, r := range arc.Records {
 		items[i] = recordItem{r}
@@ -74,6 +80,9 @@ func NewAppModel(filename string, arc *lbx.Archive, palette color.Palette) AppMo
 	return AppModel{
 		filename:     filename,
 		archive:      arc,
+		lbxName:      lbxName,
+		assetsDir:    assetsDir,
+		reg:          reg,
 		palette:      palette,
 		list:         l,
 		input:        ti,
@@ -113,6 +122,9 @@ func (m AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		if m.mode == modeExtract {
 			return m.updateExtract(msg)
+		}
+		if m.mode == modeConvert {
+			return m.updateConvert(msg)
 		}
 		return m.updateList(msg)
 	}
@@ -160,11 +172,107 @@ func (m AppModel) updateList(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		m.input.SetValue(fmt.Sprintf("%03d.%s", r.Index, strings.ToLower(r.Type.String())))
 		m.input.CursorEnd()
 		return m, m.input.Focus()
+
+	case "c":
+		r := m.selectedRecord()
+		if r == nil {
+			return m, nil
+		}
+		if r.Type != lbx.RecordLBX {
+			m.statusMsg = "not a sprite record"
+			return m, nil
+		}
+		if _, err := lbx.ParseSpriteHeader(r.Data); err != nil {
+			m.statusMsg = "not a sprite record"
+			return m, nil
+		}
+		m.mode = modeConvert
+		m.input.SetValue(fmt.Sprintf("%03d.svg", r.Index))
+		m.input.CursorEnd()
+		return m, m.input.Focus()
 	}
 
 	var cmd tea.Cmd
 	m.list, cmd = m.list.Update(msg)
 	return m, cmd
+}
+
+func (m AppModel) updateConvert(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+	switch msg.String() {
+	case "esc":
+		m.mode = modeList
+		m.input.Blur()
+		return m, nil
+
+	case "enter":
+		r := m.selectedRecord()
+		if r == nil {
+			m.mode = modeList
+			return m, nil
+		}
+		dest := m.input.Value()
+		if dest == "" {
+			dest = fmt.Sprintf("%03d.svg", r.Index)
+		}
+		pal := m.paletteForRecord(r.Index)
+		if err := convertToSVG(r, pal, dest); err != nil {
+			m.statusMsg = fmt.Sprintf("convert error: %v", err)
+		} else {
+			m.statusMsg = fmt.Sprintf("converted → %s", dest)
+		}
+		m.mode = modeList
+		m.input.Blur()
+		return m, nil
+	}
+
+	var cmd tea.Cmd
+	m.input, cmd = m.input.Update(msg)
+	return m, cmd
+}
+
+// convertToSVG decodes all frames of r and writes each as a separate SVG file.
+// For a single-frame sprite the output is <dest>; for multi-frame sprites the
+// frame index is inserted before the extension: <stem>_frame000.svg, etc.
+func convertToSVG(r *lbx.Record, pal color.Palette, dest string) error {
+	frames, err := lbx.DecodeFrames(r.Data, pal)
+	if err != nil {
+		return fmt.Errorf("decoding frames: %w", err)
+	}
+
+	upscaler := svg.XBRZUpscaler{}
+	ext := ".svg"
+	stem := strings.TrimSuffix(dest, ext)
+	if !strings.HasSuffix(strings.ToLower(dest), ext) {
+		stem = dest
+	}
+
+	for i, frame := range frames {
+		doc, err := upscaler.Upscale(frame, nil)
+		if err != nil {
+			return fmt.Errorf("upscaling frame %d: %w", i, err)
+		}
+
+		var outPath string
+		if len(frames) == 1 {
+			outPath = stem + ext
+		} else {
+			outPath = fmt.Sprintf("%s_frame%03d%s", stem, i, ext)
+		}
+
+		f, err := os.Create(outPath)
+		if err != nil {
+			return fmt.Errorf("creating %s: %w", outPath, err)
+		}
+		writeErr := doc.Write(f)
+		closeErr := f.Close()
+		if writeErr != nil {
+			return writeErr
+		}
+		if closeErr != nil {
+			return closeErr
+		}
+	}
+	return nil
 }
 
 func (m AppModel) updateExtract(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
@@ -216,7 +324,8 @@ func (m AppModel) View() string {
 	r := m.selectedRecord()
 	var previewStr string
 	if r != nil {
-		previewStr = renderPreview(r, m.palette, rightW, contentH, m.previewCache)
+		pal := m.paletteForRecord(r.Index)
+		previewStr = renderPreview(r, pal, rightW, contentH, m.previewCache)
 	}
 	rightStyle := lipgloss.NewStyle().Width(rightW).Height(contentH).
 		BorderLeft(true).BorderStyle(lipgloss.NormalBorder()).PaddingLeft(1)
@@ -225,7 +334,7 @@ func (m AppModel) View() string {
 	body := lipgloss.JoinHorizontal(lipgloss.Top, left, right)
 
 	// Help bar.
-	help := "↑↓ navigate   space play   x extract   esc/ctrl+c quit"
+	help := "↑↓ navigate   space play   x extract   c convert SVG   esc/ctrl+c quit"
 	if m.statusMsg != "" {
 		help = m.statusMsg + "   |   " + help
 	}
@@ -234,12 +343,16 @@ func (m AppModel) View() string {
 
 	ui := lipgloss.JoinVertical(lipgloss.Left, body, helpBar)
 
-	// Extract dialog overlay.
+	// Extract / convert dialog overlay.
 	if m.mode == modeExtract {
 		dialog := renderExtractDialog(m.input, m.width, m.height)
 		ui = lipgloss.Place(m.width, m.height, lipgloss.Center, lipgloss.Center, dialog,
 			lipgloss.WithWhitespaceChars(" "))
-		// Re-draw body behind dialog — just overlay on top.
+		_ = body
+	} else if m.mode == modeConvert {
+		dialog := renderConvertDialog(m.input, m.width, m.height)
+		ui = lipgloss.Place(m.width, m.height, lipgloss.Center, lipgloss.Center, dialog,
+			lipgloss.WithWhitespaceChars(" "))
 		_ = body
 	}
 
@@ -254,6 +367,28 @@ func renderExtractDialog(ti textinput.Model, w, h int) string {
 
 	content := "Extract record to file:\n\n" + ti.View() + "\n\nEnter to confirm   Esc to cancel"
 	return boxStyle.Render(content)
+}
+
+func renderConvertDialog(ti textinput.Model, w, h int) string {
+	boxStyle := lipgloss.NewStyle().
+		Border(lipgloss.RoundedBorder()).
+		Padding(1, 2).
+		Width(50)
+
+	content := "Convert sprite to SVG:\n\n" + ti.View() + "\n\nEnter to confirm   Esc to cancel"
+	return boxStyle.Render(content)
+}
+
+func (m *AppModel) paletteForRecord(recordIdx int) color.Palette {
+	if m.reg != nil {
+		refs := m.reg.LBXPaletteFor(m.lbxName, recordIdx)
+		if refs != nil {
+			if pal, err := lbx.BuildPalette(m.assetsDir, refs); err == nil {
+				return pal
+			}
+		}
+	}
+	return m.palette
 }
 
 func (m *AppModel) selectedRecord() *lbx.Record {

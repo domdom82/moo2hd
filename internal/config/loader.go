@@ -12,26 +12,28 @@ import (
 // rawConfig is the in-memory shape that YAML files are decoded into before
 // being promoted to the typed slices inside Registry.
 type rawConfig struct {
-	Races      []Race       `yaml:"races,omitempty"`
-	Ships      []Ship       `yaml:"ships,omitempty"`
-	Techs      []Technology `yaml:"techs,omitempty"`
-	Planets    []Planet     `yaml:"planets,omitempty"`
-	Leaders    []Leader     `yaml:"leaders,omitempty"`
-	Buildings  []Building   `yaml:"buildings,omitempty"`
-	Monsters   []Monster    `yaml:"monsters,omitempty"`
-	Components []Component  `yaml:"components,omitempty"`
+	Races       []Race             `yaml:"races,omitempty"`
+	Ships       []Ship             `yaml:"ships,omitempty"`
+	Techs       []Technology       `yaml:"techs,omitempty"`
+	Planets     []Planet           `yaml:"planets,omitempty"`
+	Leaders     []Leader           `yaml:"leaders,omitempty"`
+	Buildings   []Building         `yaml:"buildings,omitempty"`
+	Monsters    []Monster          `yaml:"monsters,omitempty"`
+	Components  []Component        `yaml:"components,omitempty"`
+	LBXPalettes []LBXPaletteEntry  `yaml:"lbx_palettes,omitempty"`
 }
 
 // Registry is the read-only view of fully-merged game configuration.
 type Registry struct {
-	races      map[string]*Race
-	ships      map[string]*Ship
-	techs      map[string]*Technology
-	planets    map[string]*Planet
-	leaders    map[string]*Leader
-	buildings  map[string]*Building
-	monsters   map[string]*Monster
-	components map[string]*Component
+	races       map[string]*Race
+	ships       map[string]*Ship
+	techs       map[string]*Technology
+	planets     map[string]*Planet
+	leaders     map[string]*Leader
+	buildings   map[string]*Building
+	monsters    map[string]*Monster
+	components  map[string]*Component
+	lbxPalettes map[string]*LBXPaletteEntry // keyed by id
 }
 
 // Race returns the race with the given id, or an error if not found.
@@ -136,6 +138,17 @@ func (r *Registry) Ships() []*Ship {
 	return out
 }
 
+// LBXPaletteFor returns the palette dependency list for the sprite at the given
+// LBX file and record index. Returns nil if no entry is configured.
+func (r *Registry) LBXPaletteFor(lbxFile string, record int) []LBXPaletteRef {
+	for _, e := range r.lbxPalettes {
+		if e.LBX == lbxFile && e.Record == record {
+			return e.Palettes
+		}
+	}
+	return nil
+}
+
 // Techs returns all technologies sorted by id.
 func (r *Registry) Techs() []*Technology {
 	out := make([]*Technology, 0, len(r.techs))
@@ -228,14 +241,15 @@ func sortedSubdirs(root string) ([]string, error) {
 // mergeInto overlays src onto dst. For each entity type, entries in src whose
 // id already exists in dst replace the existing entry; new ids are appended.
 func mergeInto(dst, src *rawConfig) {
-	dst.Races      = mergeByID(dst.Races, src.Races, func(r Race) string { return r.ID })
-	dst.Ships      = mergeByID(dst.Ships, src.Ships, func(s Ship) string { return s.ID })
-	dst.Techs      = mergeByID(dst.Techs, src.Techs, func(t Technology) string { return t.ID })
-	dst.Planets    = mergeByID(dst.Planets, src.Planets, func(p Planet) string { return p.ID })
-	dst.Leaders    = mergeByID(dst.Leaders, src.Leaders, func(l Leader) string { return l.ID })
-	dst.Buildings  = mergeByID(dst.Buildings, src.Buildings, func(b Building) string { return b.ID })
-	dst.Monsters   = mergeByID(dst.Monsters, src.Monsters, func(m Monster) string { return m.ID })
-	dst.Components = mergeByID(dst.Components, src.Components, func(c Component) string { return c.ID })
+	dst.Races       = mergeByID(dst.Races, src.Races, func(r Race) string { return r.ID })
+	dst.Ships       = mergeByID(dst.Ships, src.Ships, func(s Ship) string { return s.ID })
+	dst.Techs       = mergeByID(dst.Techs, src.Techs, func(t Technology) string { return t.ID })
+	dst.Planets     = mergeByID(dst.Planets, src.Planets, func(p Planet) string { return p.ID })
+	dst.Leaders     = mergeByID(dst.Leaders, src.Leaders, func(l Leader) string { return l.ID })
+	dst.Buildings   = mergeByID(dst.Buildings, src.Buildings, func(b Building) string { return b.ID })
+	dst.Monsters    = mergeByID(dst.Monsters, src.Monsters, func(m Monster) string { return m.ID })
+	dst.Components  = mergeByID(dst.Components, src.Components, func(c Component) string { return c.ID })
+	dst.LBXPalettes = mergeByID(dst.LBXPalettes, src.LBXPalettes, func(e LBXPaletteEntry) string { return e.ID })
 }
 
 func mergeByID[T any](dst, src []T, id func(T) string) []T {
@@ -258,14 +272,15 @@ func mergeByID[T any](dst, src []T, id func(T) string) []T {
 // buildRegistry converts rawConfig slices into map-keyed Registry.
 func buildRegistry(raw *rawConfig) *Registry {
 	r := &Registry{
-		races:      make(map[string]*Race, len(raw.Races)),
-		ships:      make(map[string]*Ship, len(raw.Ships)),
-		techs:      make(map[string]*Technology, len(raw.Techs)),
-		planets:    make(map[string]*Planet, len(raw.Planets)),
-		leaders:    make(map[string]*Leader, len(raw.Leaders)),
-		buildings:  make(map[string]*Building, len(raw.Buildings)),
-		monsters:   make(map[string]*Monster, len(raw.Monsters)),
-		components: make(map[string]*Component, len(raw.Components)),
+		races:       make(map[string]*Race, len(raw.Races)),
+		ships:       make(map[string]*Ship, len(raw.Ships)),
+		techs:       make(map[string]*Technology, len(raw.Techs)),
+		planets:     make(map[string]*Planet, len(raw.Planets)),
+		leaders:     make(map[string]*Leader, len(raw.Leaders)),
+		buildings:   make(map[string]*Building, len(raw.Buildings)),
+		monsters:    make(map[string]*Monster, len(raw.Monsters)),
+		components:  make(map[string]*Component, len(raw.Components)),
+		lbxPalettes: make(map[string]*LBXPaletteEntry, len(raw.LBXPalettes)),
 	}
 	for i := range raw.Races {
 		v := raw.Races[i]
@@ -298,6 +313,10 @@ func buildRegistry(raw *rawConfig) *Registry {
 	for i := range raw.Components {
 		v := raw.Components[i]
 		r.components[v.ID] = &v
+	}
+	for i := range raw.LBXPalettes {
+		v := raw.LBXPalettes[i]
+		r.lbxPalettes[v.ID] = &v
 	}
 	return r
 }

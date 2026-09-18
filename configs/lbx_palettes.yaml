@@ -1,0 +1,393 @@
+lbx_palettes:
+  - id: ships_000
+    lbx: SHIPS.LBX
+    record: 0
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+      - lbx: SHIPS.LBX
+        record: 49
+  - id: ships_001
+    lbx: SHIPS.LBX
+    record: 1
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+      - lbx: SHIPS.LBX
+        record: 49
+  - id: ships_002
+    lbx: SHIPS.LBX
+    record: 2
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+      - lbx: SHIPS.LBX
+        record: 49
+  - id: ships_003
+    lbx: SHIPS.LBX
+    record: 3
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+      - lbx: SHIPS.LBX
+        record: 49
+  - id: ships_004
+    lbx: SHIPS.LBX
+    record: 4
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+      - lbx: SHIPS.LBX
+        record: 49
+  - id: ships_005
+    lbx: SHIPS.LBX
+    record: 5
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+      - lbx: SHIPS.LBX
+        record: 49
+  - id: ships_006
+    lbx: SHIPS.LBX
+    record: 6
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+      - lbx: SHIPS.LBX
+        record: 49
+  - id: ships_007
+    lbx: SHIPS.LBX
+    record: 7
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+      - lbx: SHIPS.LBX
+        record: 49
+  - id: ships_008
+    lbx: SHIPS.LBX
+    record: 8
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+      - lbx: SHIPS.LBX
+        record: 49
+  - id: ships_009
+    lbx: SHIPS.LBX
+    record: 9
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+      - lbx: SHIPS.LBX
+        record: 49
+  - id: ships_010
+    lbx: SHIPS.LBX
+    record: 10
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+      - lbx: SHIPS.LBX
+        record: 49
+  - id: ships_011
+    lbx: SHIPS.LBX
+    record: 11
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+      - lbx: SHIPS.LBX
+        record: 49
+  - id: ships_012
+    lbx: SHIPS.LBX
+    record: 12
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+      - lbx: SHIPS.LBX
+        record: 49
+  - id: ships_013
+    lbx: SHIPS.LBX
+    record: 13
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+      - lbx: SHIPS.LBX
+        record: 49
+  - id: ships_014
+    lbx: SHIPS.LBX
+    record: 14
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+      - lbx: SHIPS.LBX
+        record: 49
+  - id: ships_015
+    lbx: SHIPS.LBX
+    record: 15
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+      - lbx: SHIPS.LBX
+        record: 49
+  - id: ships_016
+    lbx: SHIPS.LBX
+    record: 16
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+      - lbx: SHIPS.LBX
+        record: 49
+  - id: ships_017
+    lbx: SHIPS.LBX
+    record: 17
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+      - lbx: SHIPS.LBX
+        record: 49
+  - id: ships_018
+    lbx: SHIPS.LBX
+    record: 18
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+      - lbx: SHIPS.LBX
+        record: 49
+  - id: ships_019
+    lbx: SHIPS.LBX
+    record: 19
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+      - lbx: SHIPS.LBX
+        record: 49
+  - id: ships_020
+    lbx: SHIPS.LBX
+    record: 20
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+      - lbx: SHIPS.LBX
+        record: 49
+  - id: ships_021
+    lbx: SHIPS.LBX
+    record: 21
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+      - lbx: SHIPS.LBX
+        record: 49
+  - id: ships_022
+    lbx: SHIPS.LBX
+    record: 22
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+      - lbx: SHIPS.LBX
+        record: 49
+  - id: ships_023
+    lbx: SHIPS.LBX
+    record: 23
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+      - lbx: SHIPS.LBX
+        record: 49
+  - id: ships_024
+    lbx: SHIPS.LBX
+    record: 24
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+      - lbx: SHIPS.LBX
+        record: 49
+  - id: ships_025
+    lbx: SHIPS.LBX
+    record: 25
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+      - lbx: SHIPS.LBX
+        record: 49
+  - id: ships_026
+    lbx: SHIPS.LBX
+    record: 26
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+      - lbx: SHIPS.LBX
+        record: 49
+  - id: ships_027
+    lbx: SHIPS.LBX
+    record: 27
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+      - lbx: SHIPS.LBX
+        record: 49
+  - id: ships_028
+    lbx: SHIPS.LBX
+    record: 28
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+      - lbx: SHIPS.LBX
+        record: 49
+  - id: ships_029
+    lbx: SHIPS.LBX
+    record: 29
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+      - lbx: SHIPS.LBX
+        record: 49
+  - id: ships_030
+    lbx: SHIPS.LBX
+    record: 30
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+      - lbx: SHIPS.LBX
+        record: 49
+  - id: ships_031
+    lbx: SHIPS.LBX
+    record: 31
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+      - lbx: SHIPS.LBX
+        record: 49
+  - id: ships_032
+    lbx: SHIPS.LBX
+    record: 32
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+      - lbx: SHIPS.LBX
+        record: 49
+  - id: ships_033
+    lbx: SHIPS.LBX
+    record: 33
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+      - lbx: SHIPS.LBX
+        record: 49
+  - id: ships_034
+    lbx: SHIPS.LBX
+    record: 34
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+      - lbx: SHIPS.LBX
+        record: 49
+  - id: ships_035
+    lbx: SHIPS.LBX
+    record: 35
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+      - lbx: SHIPS.LBX
+        record: 49
+  - id: ships_036
+    lbx: SHIPS.LBX
+    record: 36
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+      - lbx: SHIPS.LBX
+        record: 49
+  - id: ships_037
+    lbx: SHIPS.LBX
+    record: 37
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+      - lbx: SHIPS.LBX
+        record: 49
+  - id: ships_038
+    lbx: SHIPS.LBX
+    record: 38
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+      - lbx: SHIPS.LBX
+        record: 49
+  - id: ships_039
+    lbx: SHIPS.LBX
+    record: 39
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+      - lbx: SHIPS.LBX
+        record: 49
+  - id: ships_040
+    lbx: SHIPS.LBX
+    record: 40
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+      - lbx: SHIPS.LBX
+        record: 49
+  - id: ships_041
+    lbx: SHIPS.LBX
+    record: 41
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+      - lbx: SHIPS.LBX
+        record: 49
+  - id: ships_042
+    lbx: SHIPS.LBX
+    record: 42
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+      - lbx: SHIPS.LBX
+        record: 49
+  - id: ships_043
+    lbx: SHIPS.LBX
+    record: 43
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+      - lbx: SHIPS.LBX
+        record: 49
+  - id: ships_044
+    lbx: SHIPS.LBX
+    record: 44
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+      - lbx: SHIPS.LBX
+        record: 49
+  - id: ships_045
+    lbx: SHIPS.LBX
+    record: 45
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+      - lbx: SHIPS.LBX
+        record: 49
+  - id: ships_046
+    lbx: SHIPS.LBX
+    record: 46
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+      - lbx: SHIPS.LBX
+        record: 49
+  - id: ships_047
+    lbx: SHIPS.LBX
+    record: 47
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+      - lbx: SHIPS.LBX
+        record: 49
+  - id: ships_048
+    lbx: SHIPS.LBX
+    record: 48
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+      - lbx: SHIPS.LBX
+        record: 49
