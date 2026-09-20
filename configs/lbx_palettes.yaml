@@ -3379,3 +3379,291 @@ lbx_palettes:
     palettes:
       - lbx: FONTS.LBX
         record: 1
+  - id: starbg_006
+    lbx: STARBG.LBX
+    record: 6
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: starbg_007
+    lbx: STARBG.LBX
+    record: 7
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: starbg_008
+    lbx: STARBG.LBX
+    record: 8
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: starbg_009
+    lbx: STARBG.LBX
+    record: 9
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: starbg_010
+    lbx: STARBG.LBX
+    record: 10
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: starbg_011
+    lbx: STARBG.LBX
+    record: 11
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: starbg_012
+    lbx: STARBG.LBX
+    record: 12
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: starbg_013
+    lbx: STARBG.LBX
+    record: 13
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: starbg_014
+    lbx: STARBG.LBX
+    record: 14
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: starbg_015
+    lbx: STARBG.LBX
+    record: 15
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: starbg_016
+    lbx: STARBG.LBX
+    record: 16
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: starbg_017
+    lbx: STARBG.LBX
+    record: 17
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: starbg_018
+    lbx: STARBG.LBX
+    record: 18
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: starbg_019
+    lbx: STARBG.LBX
+    record: 19
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: starbg_020
+    lbx: STARBG.LBX
+    record: 20
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: starbg_021
+    lbx: STARBG.LBX
+    record: 21
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: starbg_022
+    lbx: STARBG.LBX
+    record: 22
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: starbg_023
+    lbx: STARBG.LBX
+    record: 23
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: starbg_024
+    lbx: STARBG.LBX
+    record: 24
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: starbg_025
+    lbx: STARBG.LBX
+    record: 25
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: starbg_026
+    lbx: STARBG.LBX
+    record: 26
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: starbg_027
+    lbx: STARBG.LBX
+    record: 27
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: starbg_028
+    lbx: STARBG.LBX
+    record: 28
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: starbg_029
+    lbx: STARBG.LBX
+    record: 29
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: starbg_030
+    lbx: STARBG.LBX
+    record: 30
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: starbg_031
+    lbx: STARBG.LBX
+    record: 31
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: starbg_032
+    lbx: STARBG.LBX
+    record: 32
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: starbg_033
+    lbx: STARBG.LBX
+    record: 33
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: starbg_034
+    lbx: STARBG.LBX
+    record: 34
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: starbg_035
+    lbx: STARBG.LBX
+    record: 35
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: starbg_036
+    lbx: STARBG.LBX
+    record: 36
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: starbg_037
+    lbx: STARBG.LBX
+    record: 37
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: starbg_038
+    lbx: STARBG.LBX
+    record: 38
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: starbg_039
+    lbx: STARBG.LBX
+    record: 39
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: starbg_040
+    lbx: STARBG.LBX
+    record: 40
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: starbg_041
+    lbx: STARBG.LBX
+    record: 41
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: starbg_042
+    lbx: STARBG.LBX
+    record: 42
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: starbg_043
+    lbx: STARBG.LBX
+    record: 43
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: starbg_044
+    lbx: STARBG.LBX
+    record: 44
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: starbg_045
+    lbx: STARBG.LBX
+    record: 45
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: starbg_046
+    lbx: STARBG.LBX
+    record: 46
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: starbg_047
+    lbx: STARBG.LBX
+    record: 47
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: starbg_048
+    lbx: STARBG.LBX
+    record: 48
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: starbg_049
+    lbx: STARBG.LBX
+    record: 49
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: starbg_050
+    lbx: STARBG.LBX
+    record: 50
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: starbg_051
+    lbx: STARBG.LBX
+    record: 51
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: starbg_052
+    lbx: STARBG.LBX
+    record: 52
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: starbg_053
+    lbx: STARBG.LBX
+    record: 53
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1

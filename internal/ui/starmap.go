@@ -32,10 +32,11 @@ const (
 // StarMap renders the galaxy star map at the appropriate level-of-detail
 // for the current zoom level. It reads game state but never modifies it.
 type StarMap struct {
-	g    *galaxy.Galaxy
-	cam  Camera
-	font *FontManager
-	bg   *BackgroundManager
+	g       *galaxy.Galaxy
+	cam     Camera
+	font    *FontManager
+	bg      *BackgroundManager
+	nebulas *NebulaManager
 
 	// focusedSystem is the system shown in ZoomSystem view; -1 when none.
 	focusedSystem galaxy.SystemID
@@ -61,12 +62,13 @@ type StarMap struct {
 }
 
 // NewStarMap creates a StarMap for the given galaxy.
-func NewStarMap(g *galaxy.Galaxy, cam Camera, font *FontManager, bg *BackgroundManager) *StarMap {
+func NewStarMap(g *galaxy.Galaxy, cam Camera, font *FontManager, bg *BackgroundManager, nebulas *NebulaManager) *StarMap {
 	return &StarMap{
 		g:               g,
 		cam:             cam,
 		font:            font,
 		bg:              bg,
+		nebulas:         nebulas,
 		focusedSystem:   -1,
 		planetScreenPos: make(map[galaxy.PlanetID][2]float32),
 	}
@@ -284,6 +286,10 @@ func (sm *StarMap) Draw(r *sdl.Renderer) error {
 		return r.Present()
 	}
 
+	if sm.cam.Tier() != ZoomSystem {
+		sm.drawNebulas(r)
+	}
+
 	switch sm.cam.Tier() {
 	case ZoomFar:
 		sm.drawFar(r)
@@ -296,6 +302,40 @@ func (sm *StarMap) Draw(r *sdl.Renderer) error {
 	}
 
 	return r.Present()
+}
+
+// drawNebulas renders all galaxy nebulas between the background and the stars.
+// Each nebula is stretched to its ellipse bounds in screen space with alpha
+// blending so the art's transparent edges fade naturally.
+func (sm *StarMap) drawNebulas(r *sdl.Renderer) {
+	if sm.nebulas == nil {
+		return
+	}
+	r.SetDrawBlendMode(sdl.BLENDMODE_BLEND)
+	for i := range sm.g.Nebulas {
+		n := &sm.g.Nebulas[i]
+		tex := sm.nebulas.TextureFor(n)
+		if tex == nil {
+			continue
+		}
+		screenRX := n.RadiusX * sm.cam.Zoom
+		screenRY := n.RadiusY * sm.cam.Zoom
+		maxR := screenRX
+		if screenRY > maxR {
+			maxR = screenRY
+		}
+		if !sm.cam.Visible(n.X, n.Y, maxR) {
+			continue
+		}
+		sx, sy := sm.cam.GalaxyToScreen(n.X, n.Y)
+		dst := sdl.FRect{
+			X: sx - screenRX,
+			Y: sy - screenRY,
+			W: screenRX * 2,
+			H: screenRY * 2,
+		}
+		_ = r.RenderTexture(tex, nil, &dst)
+	}
 }
 
 // drawFar renders each system as a large semi-transparent filled circle

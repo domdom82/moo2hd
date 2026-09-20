@@ -92,7 +92,13 @@ func main() {
 	}
 	defer bg.Close()
 
-	sm := ui.NewStarMap(g, cam, font, bg)
+	nm, err := ui.NewNebulaManager(renderer, "assets/", reg)
+	if err != nil {
+		log.Printf("warning: could not load nebula textures: %v", err)
+	}
+	defer nm.Close()
+
+	sm := ui.NewStarMap(g, cam, font, bg, nm)
 	sm.SetColonyData(mgr, localRace)
 	ih := ui.NewInputHandler(sm.Camera(), glxOpt.Width, glxOpt.Height)
 	sm.Bind(ih)

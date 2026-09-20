@@ -9,11 +9,22 @@ import (
 // Options controls how a galaxy is generated.
 type Options struct {
 	Seed         uint64
-	SystemCount  int     // 5–1000; default 70
-	FactionCount int     // 1–8; default 8
-	Width        float32 // map extent in arbitrary units; default 1000
+	Size         GalaxySize // named size tier; empty means custom dimensions
+	SystemCount  int        // 5–1000; default 70
+	FactionCount int        // 1–8; default 8
+	Width        float32    // map extent in arbitrary units; default 1000
 	Height       float32
 	MinDistance  float32 // minimum separation between systems; default 40
+}
+
+// nebulaCoverage maps each named galaxy size to the fraction of star systems
+// that should fall inside at least one nebula.
+var nebulaCoverage = map[GalaxySize]float32{
+	GalaxySizeSmall:   0.10,
+	GalaxySizeMedium:  0.12,
+	GalaxySizeLarge:   0.12,
+	GalaxySizeCluster: 0.12,
+	GalaxySizeHuge:    0.15,
 }
 
 // OptionsForSize returns Options pre-populated with the canonical star count
@@ -26,6 +37,7 @@ func OptionsForSize(size GalaxySize) Options {
 	area := p.Width * p.Height
 	minDist := float32(math.Sqrt(float64(area) / float64(p.StarCount)))
 	return Options{
+		Size:        size,
 		SystemCount: p.StarCount,
 		Width:       p.Width,
 		Height:      p.Height,
@@ -79,6 +91,7 @@ func (g *Generator) Generate() (*Galaxy, error) {
 	g.assignFactions(systems)
 	planets := g.generatePlanets(systems)
 	adj := g.assignSpecials(systems)
+	nebulas := g.generateNebulas(systems)
 
 	nameMap := make(map[string]SystemID, len(systems))
 	for i, s := range systems {
@@ -89,6 +102,7 @@ func (g *Generator) Generate() (*Galaxy, error) {
 		Seed:         g.opts.Seed,
 		Systems:      systems,
 		Planets:      planets,
+		Nebulas:      nebulas,
 		Adjacency:    adj,
 		systemByName: nameMap,
 	}, nil
@@ -505,4 +519,175 @@ func systemName(i int) string {
 		return systemNames[i]
 	}
 	return fmt.Sprintf("System-%d", i)
+}
+
+// generateNebulas places nebulas to cover a target fraction of systems. It
+// prefers placing one larger nebula over multiple small ones: for each
+// placement it picks a random uncovered system as an anchor, gathers all
+// uncovered neighbours within the huge-radius neighbourhood, then chooses
+// the smallest size tier whose ellipse covers all of them at once.
+func (g *Generator) generateNebulas(systems []System) []Nebula {
+	// Look up coverage target for this galaxy size.
+	fraction := float32(0.12)
+	if f, ok := nebulaCoverage[g.opts.Size]; ok {
+		fraction = f
+	}
+	targetCovered := int(math.Ceil(float64(len(systems)) * float64(fraction)))
+	if targetCovered == 0 {
+		return nil
+	}
+
+	// Radii for each size tier (X half-extent; Y = X / aspectX).
+	shorter := g.opts.Height
+	if g.opts.Width < g.opts.Height {
+		shorter = g.opts.Width
+	}
+	aspectX := float32(1.25)
+	radiiX := map[NebulaSize]float32{
+		NebulaSizeSmall:  shorter * 0.030,
+		NebulaSizeMedium: shorter * 0.050,
+		NebulaSizeLarge:  shorter * 0.070,
+		NebulaSizeHuge:   shorter * 0.095,
+	}
+	sizeOrder := []NebulaSize{NebulaSizeSmall, NebulaSizeMedium, NebulaSizeLarge, NebulaSizeHuge}
+
+	// Build uncovered set (bit index == system index).
+	covered := make([]bool, len(systems))
+	coveredCount := 0
+
+	// Shuffle art indices for variety across galaxies.
+	artOrder := g.rng.Perm(NebulaArtCount)
+	artIdx := 0
+
+	nebulas := make([]Nebula, 0, NebulaArtCount)
+	hugeRX := radiiX[NebulaSizeHuge]
+
+	for coveredCount < targetCovered && artIdx < NebulaArtCount {
+		// Pick a random uncovered system as anchor.
+		anchor := g.pickUncoveredSystem(covered, coveredCount, len(systems))
+		if anchor < 0 {
+			break
+		}
+		ax := systems[anchor].X
+		ay := systems[anchor].Y
+
+		// Collect uncovered neighbours within huge-radius neighbourhood.
+		neighbourRX := hugeRX * 1.1
+		neighbourRY := neighbourRX / aspectX
+		candidates := []int{anchor}
+		for i := range systems {
+			if i == anchor || covered[i] {
+				continue
+			}
+			dx := systems[i].X - ax
+			dy := systems[i].Y - ay
+			if (dx/neighbourRX)*(dx/neighbourRX)+(dy/neighbourRY)*(dy/neighbourRY) <= 1.0 {
+				candidates = append(candidates, i)
+			}
+		}
+
+		// Bounding box of all candidates.
+		minX, maxX, minY, maxY := ax, ax, ay, ay
+		for _, idx := range candidates {
+			if systems[idx].X < minX {
+				minX = systems[idx].X
+			}
+			if systems[idx].X > maxX {
+				maxX = systems[idx].X
+			}
+			if systems[idx].Y < minY {
+				minY = systems[idx].Y
+			}
+			if systems[idx].Y > maxY {
+				maxY = systems[idx].Y
+			}
+		}
+		cx := (minX + maxX) / 2
+		cy := (minY + maxY) / 2
+
+		// Choose smallest size that covers all candidates from the centre.
+		chosenSize := NebulaSizeHuge
+		for _, sz := range sizeOrder {
+			rx := radiiX[sz]
+			ry := rx / aspectX
+			fits := true
+			for _, idx := range candidates {
+				dx := systems[idx].X - cx
+				dy := systems[idx].Y - cy
+				if (dx/rx)*(dx/rx)+(dy/ry)*(dy/ry) > 1.0 {
+					fits = false
+					break
+				}
+			}
+			if fits {
+				chosenSize = sz
+				break
+			}
+		}
+
+		rx := radiiX[chosenSize]
+		ry := rx / aspectX
+
+		// Clamp centre so nebula body stays fully inside the map.
+		cx = clampF32(cx, rx, g.opts.Width-rx)
+		cy = clampF32(cy, ry, g.opts.Height-ry)
+
+		// Collect all systems inside this ellipse (not just the candidates).
+		var inside []SystemID
+		for i := range systems {
+			dx := systems[i].X - cx
+			dy := systems[i].Y - cy
+			if (dx/rx)*(dx/rx)+(dy/ry)*(dy/ry) <= 1.0 {
+				inside = append(inside, SystemID(i))
+				if !covered[i] {
+					covered[i] = true
+					coveredCount++
+				}
+			}
+		}
+
+		nebulas = append(nebulas, Nebula{
+			X:        cx,
+			Y:        cy,
+			RadiusX:  rx,
+			RadiusY:  ry,
+			Size:     chosenSize,
+			ArtIndex: artOrder[artIdx],
+			Systems:  inside,
+		})
+		artIdx++
+	}
+
+	return nebulas
+}
+
+// pickUncoveredSystem returns the index of a randomly chosen uncovered system,
+// or -1 if all systems are covered.
+func (g *Generator) pickUncoveredSystem(covered []bool, coveredCount, total int) int {
+	remaining := total - coveredCount
+	if remaining == 0 {
+		return -1
+	}
+	// Pick the k-th uncovered system.
+	k := g.rng.IntN(remaining)
+	n := 0
+	for i, c := range covered {
+		if !c {
+			if n == k {
+				return i
+			}
+			n++
+		}
+	}
+	return -1
+}
+
+func clampF32(v, lo, hi float32) float32 {
+	if v < lo {
+		return lo
+	}
+	if v > hi {
+		return hi
+	}
+	return v
 }

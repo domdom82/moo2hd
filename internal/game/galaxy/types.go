@@ -72,6 +72,51 @@ const (
 	SpecialLostHero    Special = "lost_hero"
 )
 
+// NebulaSize is the visual/gameplay size tier of a nebula.
+type NebulaSize string
+
+const (
+	NebulaSizeSmall  NebulaSize = "small"
+	NebulaSizeMedium NebulaSize = "medium"
+	NebulaSizeLarge  NebulaSize = "large"
+	NebulaSizeHuge   NebulaSize = "huge"
+)
+
+// nebulaSizeOrder maps NebulaSize to its 0-based index within a 4-record art
+// group (records 6–53 in STARBG.LBX are arranged as groups of 4: large,
+// medium, small, tiny/huge — offsets 0..3 within each group).
+var nebulaSizeOffset = map[NebulaSize]int{
+	NebulaSizeLarge:  0,
+	NebulaSizeMedium: 1,
+	NebulaSizeSmall:  2,
+	NebulaSizeHuge:   3,
+}
+
+// NebulaArtCount is the number of distinct nebula art sets in STARBG.LBX.
+// Records 6–53 are 12 groups of 4 size variants.
+const NebulaArtCount = 12
+
+// Nebula is a cloud region placed in the galaxy.
+type Nebula struct {
+	// X, Y is the centre of the nebula in galaxy coordinates.
+	X, Y float32
+	// RadiusX, RadiusY is the half-extents of the nebula ellipse in galaxy
+	// coordinates. Systems whose distance falls within these radii are inside.
+	RadiusX, RadiusY float32
+	// Size is the display/gameplay size tier.
+	Size NebulaSize
+	// ArtIndex selects which of the 12 nebula art sets to use (0–11).
+	ArtIndex int
+	// Systems holds the IDs of star systems located inside this nebula.
+	Systems []SystemID
+}
+
+// LBXRecord returns the STARBG.LBX record index for this nebula's art.
+// Records 6–53: group = ArtIndex*4, offset within group = nebulaSizeOffset[Size].
+func (n *Nebula) LBXRecord() int {
+	return 6 + n.ArtIndex*4 + nebulaSizeOffset[n.Size]
+}
+
 // Planet is a single planet body stored in Galaxy.Planets.
 type Planet struct {
 	ID       PlanetID
@@ -108,6 +153,7 @@ type Galaxy struct {
 	Seed         uint64
 	Systems      []System
 	Planets      []Planet
+	Nebulas      []Nebula
 	Adjacency    [][]Lane // indexed by SystemID
 	systemByName map[string]SystemID
 }
