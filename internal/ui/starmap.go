@@ -35,6 +35,7 @@ type StarMap struct {
 	g    *galaxy.Galaxy
 	cam  Camera
 	font *FontManager
+	bg   *BackgroundManager
 
 	// focusedSystem is the system shown in ZoomSystem view; -1 when none.
 	focusedSystem galaxy.SystemID
@@ -60,11 +61,12 @@ type StarMap struct {
 }
 
 // NewStarMap creates a StarMap for the given galaxy.
-func NewStarMap(g *galaxy.Galaxy, cam Camera, font *FontManager) *StarMap {
+func NewStarMap(g *galaxy.Galaxy, cam Camera, font *FontManager, bg *BackgroundManager) *StarMap {
 	return &StarMap{
 		g:               g,
 		cam:             cam,
 		font:            font,
+		bg:              bg,
 		focusedSystem:   -1,
 		planetScreenPos: make(map[galaxy.PlanetID][2]float32),
 	}
@@ -273,6 +275,7 @@ func (sm *StarMap) Draw(r *sdl.Renderer) error {
 	bg := BackgroundColor()
 	r.SetDrawColorFloat(bg.R, bg.G, bg.B, bg.A)
 	r.Clear()
+	sm.bg.Draw(r)
 
 	if sm.activeColony != nil {
 		if err := sm.activeColony.Draw(r); err != nil {

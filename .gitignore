@@ -6,6 +6,11 @@ assets/fonts/*.ttf
 bin/
 dist/
 
+moo2hd
+lbxexplore
+lbxextract
+svgconvert
+
 # Go
 *.test
 *.out

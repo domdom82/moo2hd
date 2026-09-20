@@ -3343,3 +3343,39 @@ lbx_palettes:
         record: 1
       - lbx: SHIPS.LBX
         record: 414
+  - id: starbg_000
+    lbx: STARBG.LBX
+    record: 0
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: starbg_001
+    lbx: STARBG.LBX
+    record: 1
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: starbg_002
+    lbx: STARBG.LBX
+    record: 2
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: starbg_003
+    lbx: STARBG.LBX
+    record: 3
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: starbg_004
+    lbx: STARBG.LBX
+    record: 4
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: starbg_005
+    lbx: STARBG.LBX
+    record: 5
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1

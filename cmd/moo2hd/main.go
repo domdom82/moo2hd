@@ -4,9 +4,11 @@ package main
 import (
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/Zyko0/go-sdl3/bin/binsdl"
 	"github.com/Zyko0/go-sdl3/sdl"
+	"github.com/domdom82/moo2hd/internal/config"
 	"github.com/domdom82/moo2hd/internal/game/colony"
 	"github.com/domdom82/moo2hd/internal/game/galaxy"
 	"github.com/domdom82/moo2hd/internal/ui"
@@ -29,7 +31,7 @@ func main() {
 	}
 
 	glxOpt := galaxy.OptionsForSize(galaxy.GalaxySizeHuge)
-	glxOpt.Seed = 42
+	glxOpt.Seed = uint64(time.Now().UnixNano())
 
 	g, err := galaxy.NewGenerator(glxOpt).Generate()
 	if err != nil {
@@ -79,7 +81,18 @@ func main() {
 	cam := ui.NewCamera(windowW, windowH, glxOpt.Width, glxOpt.Height)
 	font := ui.NewFontManager(renderer, "assets/fonts/DejaVuSans.ttf", 14)
 	defer font.Close()
-	sm := ui.NewStarMap(g, cam, font)
+
+	reg, err := config.Load("configs/", "mods/")
+	if err != nil {
+		log.Printf("warning: could not load config: %v", err)
+	}
+	bg, err := ui.NewBackgroundManager(renderer, "assets/", reg, glxOpt.Seed)
+	if err != nil {
+		log.Printf("warning: could not load star backgrounds: %v", err)
+	}
+	defer bg.Close()
+
+	sm := ui.NewStarMap(g, cam, font, bg)
 	sm.SetColonyData(mgr, localRace)
 	ih := ui.NewInputHandler(sm.Camera(), glxOpt.Width, glxOpt.Height)
 	sm.Bind(ih)
