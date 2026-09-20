@@ -18,7 +18,10 @@ type galaxySizeParams struct {
 	Height    float32
 }
 
-const GalaxyAspectRatio = 1.265 // width / height
+const (
+	GalaxyAspectRatio = 1.265 // width / height
+	UnitsPerParsec    = 30    // 1 parsec = 30 units in the galaxy coordinate system
+)
 
 var sizeParams = map[GalaxySize]galaxySizeParams{
 	GalaxySizeSmall:   {StarCount: 280, Width: 7084, Height: 5600},
