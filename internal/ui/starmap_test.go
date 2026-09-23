@@ -13,7 +13,7 @@ var _ = Describe("StarMap helpers", func() {
 		allTypes := []galaxy.StarType{
 			galaxy.StarYellow, galaxy.StarBlue, galaxy.StarWhite,
 			galaxy.StarOrange, galaxy.StarRed, galaxy.StarBrown,
-			galaxy.StarNeutron, galaxy.StarBlackHole,
+			galaxy.StarBlackHole,
 		}
 
 		It("returns a distinct color for every StarType", func() {

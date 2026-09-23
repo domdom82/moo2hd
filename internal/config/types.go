@@ -1,6 +1,33 @@
 package config
 
-// LBXPaletteRef identifies a single palette record within an LBX archive.
+// LBXSpriteRef identifies a single sprite record within an LBX archive.
+type LBXSpriteRef struct {
+	LBX    string `yaml:"lbx"`    // e.g. "BUFFER0.LBX"
+	Record int    `yaml:"record"` // zero-based record index
+}
+
+// StarSpriteEntry maps one star type to the LBX sprite that should be used at
+// each zoom level. A zero-value LBXSpriteRef (empty LBX string) means "no
+// sprite configured" — the renderer falls back to a coloured circle.
+type StarSpriteEntry struct {
+	Star   string       `yaml:"star"`   // matches galaxy.StarType values
+	System LBXSpriteRef `yaml:"system"` // ZoomSystem / ZoomClose (closest view)
+	Close  LBXSpriteRef `yaml:"close"`  // ZoomClose
+	Mid    LBXSpriteRef `yaml:"mid"`    // ZoomMid
+	Far    LBXSpriteRef `yaml:"far"`    // ZoomFar
+}
+
+// StarAnimTiming configures how often random star twinkle animations fire for
+// a given galaxy size. CountMin/CountMax is the number of stars to animate
+// simultaneously; IntervalMinS/IntervalMaxS is the gap between animation
+// triggers in seconds.
+type StarAnimTiming struct {
+	GalaxySize    string  `yaml:"galaxy_size"`     // matches galaxy.GalaxySize values
+	CountMin      int     `yaml:"count_min"`       // min simultaneous twinkling stars
+	CountMax      int     `yaml:"count_max"`       // max simultaneous twinkling stars
+	IntervalMinS  float64 `yaml:"interval_min_s"`  // shortest delay between triggers (seconds)
+	IntervalMaxS  float64 `yaml:"interval_max_s"`  // longest delay between triggers (seconds)
+}
 type LBXPaletteRef struct {
 	LBX    string `yaml:"lbx"`    // e.g. "FONTS.LBX"
 	Record int    `yaml:"record"` // zero-based record index

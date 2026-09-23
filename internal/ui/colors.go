@@ -20,8 +20,6 @@ func StarColor(t galaxy.StarType) sdl.FColor {
 		return sdl.FColor{R: 1.0, G: 0.15, B: 0.1, A: 1.0}
 	case galaxy.StarBrown:
 		return sdl.FColor{R: 0.55, G: 0.3, B: 0.1, A: 1.0}
-	case galaxy.StarNeutron:
-		return sdl.FColor{R: 0.8, G: 0.9, B: 1.0, A: 1.0}
 	case galaxy.StarBlackHole:
 		return sdl.FColor{R: 0.15, G: 0.0, B: 0.25, A: 1.0}
 	default:

@@ -21,6 +21,8 @@ type rawConfig struct {
 	Monsters    []Monster          `yaml:"monsters,omitempty"`
 	Components  []Component        `yaml:"components,omitempty"`
 	LBXPalettes []LBXPaletteEntry  `yaml:"lbx_palettes,omitempty"`
+	StarSprites []StarSpriteEntry  `yaml:"star_sprites,omitempty"`
+	StarAnim    []StarAnimTiming   `yaml:"star_anim,omitempty"`
 }
 
 // Registry is the read-only view of fully-merged game configuration.
@@ -34,6 +36,8 @@ type Registry struct {
 	monsters    map[string]*Monster
 	components  map[string]*Component
 	lbxPalettes map[string]*LBXPaletteEntry // keyed by id
+	starSprites map[string]*StarSpriteEntry  // keyed by star type
+	starAnim    map[string]*StarAnimTiming   // keyed by galaxy_size
 }
 
 // Race returns the race with the given id, or an error if not found.
@@ -149,6 +153,18 @@ func (r *Registry) LBXPaletteFor(lbxFile string, record int) []LBXPaletteRef {
 	return nil
 }
 
+// StarSprite returns the sprite mapping for the given star type, or nil if none
+// is configured. The star argument should be a galaxy.StarType string value.
+func (r *Registry) StarSprite(star string) *StarSpriteEntry {
+	return r.starSprites[star]
+}
+
+// StarAnimFor returns the animation timing config for the given galaxy size, or
+// nil if none is configured.
+func (r *Registry) StarAnimFor(galaxySize string) *StarAnimTiming {
+	return r.starAnim[galaxySize]
+}
+
 // Techs returns all technologies sorted by id.
 func (r *Registry) Techs() []*Technology {
 	out := make([]*Technology, 0, len(r.techs))
@@ -250,6 +266,8 @@ func mergeInto(dst, src *rawConfig) {
 	dst.Monsters    = mergeByID(dst.Monsters, src.Monsters, func(m Monster) string { return m.ID })
 	dst.Components  = mergeByID(dst.Components, src.Components, func(c Component) string { return c.ID })
 	dst.LBXPalettes = mergeByID(dst.LBXPalettes, src.LBXPalettes, func(e LBXPaletteEntry) string { return e.ID })
+	dst.StarSprites = mergeByID(dst.StarSprites, src.StarSprites, func(e StarSpriteEntry) string { return e.Star })
+	dst.StarAnim    = mergeByID(dst.StarAnim, src.StarAnim, func(e StarAnimTiming) string { return e.GalaxySize })
 }
 
 func mergeByID[T any](dst, src []T, id func(T) string) []T {
@@ -281,6 +299,8 @@ func buildRegistry(raw *rawConfig) *Registry {
 		monsters:    make(map[string]*Monster, len(raw.Monsters)),
 		components:  make(map[string]*Component, len(raw.Components)),
 		lbxPalettes: make(map[string]*LBXPaletteEntry, len(raw.LBXPalettes)),
+		starSprites: make(map[string]*StarSpriteEntry, len(raw.StarSprites)),
+		starAnim:    make(map[string]*StarAnimTiming, len(raw.StarAnim)),
 	}
 	for i := range raw.Races {
 		v := raw.Races[i]
@@ -317,6 +337,14 @@ func buildRegistry(raw *rawConfig) *Registry {
 	for i := range raw.LBXPalettes {
 		v := raw.LBXPalettes[i]
 		r.lbxPalettes[v.ID] = &v
+	}
+	for i := range raw.StarSprites {
+		v := raw.StarSprites[i]
+		r.starSprites[v.Star] = &v
+	}
+	for i := range raw.StarAnim {
+		v := raw.StarAnim[i]
+		r.starAnim[v.GalaxySize] = &v
 	}
 	return r
 }

@@ -37,6 +37,7 @@ type StarMap struct {
 	font    *FontManager
 	bg      *BackgroundManager
 	nebulas *NebulaManager
+	stars   *StarSpriteManager
 
 	// focusedSystem is the system shown in ZoomSystem view; -1 when none.
 	focusedSystem galaxy.SystemID
@@ -62,13 +63,14 @@ type StarMap struct {
 }
 
 // NewStarMap creates a StarMap for the given galaxy.
-func NewStarMap(g *galaxy.Galaxy, cam Camera, font *FontManager, bg *BackgroundManager, nebulas *NebulaManager) *StarMap {
+func NewStarMap(g *galaxy.Galaxy, cam Camera, font *FontManager, bg *BackgroundManager, nebulas *NebulaManager, stars *StarSpriteManager) *StarMap {
 	return &StarMap{
 		g:               g,
 		cam:             cam,
 		font:            font,
 		bg:              bg,
 		nebulas:         nebulas,
+		stars:           stars,
 		focusedSystem:   -1,
 		planetScreenPos: make(map[galaxy.PlanetID][2]float32),
 	}
@@ -98,6 +100,7 @@ func (sm *StarMap) Bind(ih *InputHandler) {
 // Update advances per-frame animations (pan toward system). Call once per frame.
 func (sm *StarMap) Update(dt float32) {
 	sm.updatePanToSystem(dt)
+	sm.stars.Update(dt)
 }
 
 func (sm *StarMap) updatePanToSystem(dt float32) {
@@ -431,7 +434,6 @@ func (sm *StarMap) drawLanes(r *sdl.Renderer, tier ZoomTier) {
 }
 
 func (sm *StarMap) drawStars(r *sdl.Renderer, baseRadius float32) {
-	r.SetDrawBlendMode(sdl.BLENDMODE_NONE)
 	for i := range sm.g.Systems {
 		sys := &sm.g.Systems[i]
 		radius := baseRadius * sm.cam.Zoom
@@ -442,8 +444,14 @@ func (sm *StarMap) drawStars(r *sdl.Renderer, baseRadius float32) {
 		if radius < 2 {
 			radius = 2
 		}
+		displaySize := radius * 2
+		if sm.stars.DrawStar(r, sys, sx, sy, displaySize, sm.cam.Tier()) {
+			continue
+		}
+		// Fallback: coloured circle.
 		col := StarColor(sys.Star)
 		verts := buildCircleVertices(sx, sy, radius, col)
+		r.SetDrawBlendMode(sdl.BLENDMODE_NONE)
 		r.RenderGeometry(nil, verts, circleIndices[:])
 	}
 }
@@ -492,9 +500,11 @@ func (sm *StarMap) drawSystem(r *sdl.Renderer) {
 
 	// Central star.
 	r.SetDrawBlendMode(sdl.BLENDMODE_NONE)
-	starCol := StarColor(sys.Star)
-	verts := buildCircleVertices(cx, cy, sysStarRadius, starCol)
-	r.RenderGeometry(nil, verts, circleIndices[:])
+	if !sm.stars.DrawStar(r, sys, cx, cy, sysStarRadius*2, ZoomSystem) {
+		starCol := StarColor(sys.Star)
+		verts := buildCircleVertices(cx, cy, sysStarRadius, starCol)
+		r.RenderGeometry(nil, verts, circleIndices[:])
+	}
 
 	// Planet discs at seeded angles.
 	for _, pid := range sys.Planets {

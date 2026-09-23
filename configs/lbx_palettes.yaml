@@ -3667,3 +3667,267 @@ lbx_palettes:
     palettes:
       - lbx: FONTS.LBX
         record: 1
+  - id: buffer0_148
+    lbx: BUFFER0.LBX
+    record: 148
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: buffer0_149
+    lbx: BUFFER0.LBX
+    record: 149
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: buffer0_150
+    lbx: BUFFER0.LBX
+    record: 150
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: buffer0_153
+    lbx: BUFFER0.LBX
+    record: 153
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: buffer0_148
+    lbx: BUFFER0.LBX
+    record: 148
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: buffer0_149
+    lbx: BUFFER0.LBX
+    record: 149
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: buffer0_150
+    lbx: BUFFER0.LBX
+    record: 150
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: buffer0_151
+    lbx: BUFFER0.LBX
+    record: 151
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: buffer0_152
+    lbx: BUFFER0.LBX
+    record: 152
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: buffer0_153
+    lbx: BUFFER0.LBX
+    record: 153
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: buffer0_154
+    lbx: BUFFER0.LBX
+    record: 154
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: buffer0_155
+    lbx: BUFFER0.LBX
+    record: 155
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: buffer0_156
+    lbx: BUFFER0.LBX
+    record: 156
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: buffer0_157
+    lbx: BUFFER0.LBX
+    record: 157
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: buffer0_158
+    lbx: BUFFER0.LBX
+    record: 158
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: buffer0_159
+    lbx: BUFFER0.LBX
+    record: 159
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: buffer0_160
+    lbx: BUFFER0.LBX
+    record: 160
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: buffer0_161
+    lbx: BUFFER0.LBX
+    record: 161
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: buffer0_162
+    lbx: BUFFER0.LBX
+    record: 162
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: buffer0_163
+    lbx: BUFFER0.LBX
+    record: 163
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: buffer0_164
+    lbx: BUFFER0.LBX
+    record: 164
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: buffer0_165
+    lbx: BUFFER0.LBX
+    record: 165
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: buffer0_166
+    lbx: BUFFER0.LBX
+    record: 166
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: buffer0_167
+    lbx: BUFFER0.LBX
+    record: 167
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: buffer0_168
+    lbx: BUFFER0.LBX
+    record: 168
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: buffer0_169
+    lbx: BUFFER0.LBX
+    record: 169
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: buffer0_170
+    lbx: BUFFER0.LBX
+    record: 170
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: buffer0_171
+    lbx: BUFFER0.LBX
+    record: 171
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: buffer0_172
+    lbx: BUFFER0.LBX
+    record: 172
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: buffer0_173
+    lbx: BUFFER0.LBX
+    record: 173
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: buffer0_174
+    lbx: BUFFER0.LBX
+    record: 174
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: buffer0_175
+    lbx: BUFFER0.LBX
+    record: 175
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: buffer0_176
+    lbx: BUFFER0.LBX
+    record: 176
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: buffer0_177
+    lbx: BUFFER0.LBX
+    record: 177
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: buffer0_178
+    lbx: BUFFER0.LBX
+    record: 178
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: buffer0_179
+    lbx: BUFFER0.LBX
+    record: 179
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: buffer0_180
+    lbx: BUFFER0.LBX
+    record: 180
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: buffer0_181
+    lbx: BUFFER0.LBX
+    record: 181
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: buffer0_182
+    lbx: BUFFER0.LBX
+    record: 182
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: buffer0_183
+    lbx: BUFFER0.LBX
+    record: 183
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: buffer0_184
+    lbx: BUFFER0.LBX
+    record: 184
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: buffer0_185
+    lbx: BUFFER0.LBX
+    record: 185
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: buffer0_186
+    lbx: BUFFER0.LBX
+    record: 186
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1
+  - id: buffer0_187
+    lbx: BUFFER0.LBX
+    record: 187
+    palettes:
+      - lbx: FONTS.LBX
+        record: 1

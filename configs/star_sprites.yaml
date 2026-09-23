@@ -1,0 +1,75 @@
+# Star sprite LBX mappings per star type and zoom level.
+# Each zoom level names the LBX archive and zero-based record index of the sprite
+# to render at that level of detail.
+#
+# Zoom levels:
+#   system — closest view (ZoomSystem / ZoomClose), large star art
+#   close  — ZoomClose, mid-sized art
+#   mid    — ZoomMid, small art
+#   far    — ZoomFar, tiny dot art
+star_sprites:
+  - star: orange
+    system: { lbx: BUFFER0.LBX, record: 160 }
+    close:  { lbx: BUFFER0.LBX, record: 161 }
+    mid:    { lbx: BUFFER0.LBX, record: 161 }
+    far:    { lbx: BUFFER0.LBX, record: 160 }
+  - star: blue
+    system: { lbx: BUFFER0.LBX, record: 148 }
+    close:  { lbx: BUFFER0.LBX, record: 149 }
+    mid:    { lbx: BUFFER0.LBX, record: 149 }
+    far:    { lbx: BUFFER0.LBX, record: 148 }
+  - star: white
+    system: { lbx: BUFFER0.LBX, record: 154 }
+    close:  { lbx: BUFFER0.LBX, record: 155 }
+    mid:    { lbx: BUFFER0.LBX, record: 155 }
+    far:    { lbx: BUFFER0.LBX, record: 154 }
+  - star: yellow
+    system: { lbx: BUFFER0.LBX, record: 178 }
+    close:  { lbx: BUFFER0.LBX, record: 179 }
+    mid:    { lbx: BUFFER0.LBX, record: 179 }
+    far:    { lbx: BUFFER0.LBX, record: 178 }
+  - star: brown
+    system: { lbx: BUFFER0.LBX, record: 166 }
+    close:  { lbx: BUFFER0.LBX, record: 167 }
+    mid:    { lbx: BUFFER0.LBX, record: 167 }
+    far:    { lbx: BUFFER0.LBX, record: 166 }
+  - star: red
+    system: { lbx: BUFFER0.LBX, record: 172 }
+    close:  { lbx: BUFFER0.LBX, record: 173 }
+    mid:    { lbx: BUFFER0.LBX, record: 173 }
+    far:    { lbx: BUFFER0.LBX, record: 172 }
+  - star: black_hole
+    system: { lbx: BUFFER0.LBX, record: 184 }
+    close:  { lbx: BUFFER0.LBX, record: 185 }
+    mid:    { lbx: BUFFER0.LBX, record: 185 }
+    far:    { lbx: BUFFER0.LBX, record: 184 }
+
+# Star twinkle animation timing per galaxy size.
+# count_min/count_max: how many stars may twinkle simultaneously.
+# interval_min_s/interval_max_s: seconds between triggering the next twinkle batch.
+star_anim:
+  - galaxy_size: small
+    count_min: 1
+    count_max: 2
+    interval_min_s: 90
+    interval_max_s: 240
+  - galaxy_size: medium
+    count_min: 1
+    count_max: 2
+    interval_min_s: 60
+    interval_max_s: 180
+  - galaxy_size: large
+    count_min: 1
+    count_max: 2
+    interval_min_s: 60
+    interval_max_s: 180
+  - galaxy_size: cluster
+    count_min: 2
+    count_max: 3
+    interval_min_s: 45
+    interval_max_s: 120
+  - galaxy_size: huge
+    count_min: 10
+    count_max: 20
+    interval_min_s: 30
+    interval_max_s: 60

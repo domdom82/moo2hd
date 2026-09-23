@@ -47,7 +47,6 @@ const (
 	StarOrange    StarType = "orange"
 	StarRed       StarType = "red"
 	StarBrown     StarType = "brown"
-	StarNeutron   StarType = "neutron"
 	StarBlackHole StarType = "black_hole"
 )
 

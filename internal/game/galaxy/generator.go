@@ -291,8 +291,8 @@ func (g *Generator) slotsForSize(sz SystemSize) int {
 }
 
 func (g *Generator) randomStar() StarType {
-	types := []StarType{StarYellow, StarBlue, StarWhite, StarOrange, StarRed, StarBrown, StarNeutron, StarBlackHole}
-	weights := []int{30, 10, 15, 20, 15, 5, 3, 2} // rough MOO2-like distribution
+	types := []StarType{StarYellow, StarBlue, StarWhite, StarOrange, StarRed, StarBrown, StarBlackHole}
+	weights := []int{30, 10, 15, 20, 15, 5, 3} // rough MOO2-like distribution
 	return pickWeighted(g.rng, types, weights)
 }
 
