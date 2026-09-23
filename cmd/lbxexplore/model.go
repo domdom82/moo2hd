@@ -2,10 +2,12 @@ package main
 
 import (
 	"fmt"
+	"image"
 	"image/color"
 	"os"
 	"os/exec"
 	"strings"
+	"time"
 
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/textinput"
@@ -27,6 +29,9 @@ const (
 // soundDoneMsg is sent when the audio subprocess finishes.
 type soundDoneMsg struct{ err error }
 
+// animTickMsg is sent on each animation frame advance.
+type animTickMsg struct{}
+
 // AppModel is the root bubbletea model.
 type AppModel struct {
 	filename string
@@ -46,6 +51,13 @@ type AppModel struct {
 	playCmd      *exec.Cmd
 	playTempFile string
 	statusMsg    string
+
+	// animation state
+	animFrames  []image.Image
+	animFrame   int
+	animPlaying bool
+	animDelay   time.Duration
+	animRecIdx  int // record index the current animation belongs to
 }
 
 // recordItem wraps *lbx.Record to satisfy bubbles/list.Item.
@@ -119,6 +131,13 @@ func (m AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		return m, nil
 
+	case animTickMsg:
+		if m.animPlaying && len(m.animFrames) > 0 {
+			m.animFrame = (m.animFrame + 1) % len(m.animFrames)
+			return m, animTickCmd(m.animDelay)
+		}
+		return m, nil
+
 	case tea.KeyMsg:
 		if m.mode == modeExtract {
 			return m.updateExtract(msg)
@@ -147,6 +166,13 @@ func (m AppModel) updateList(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		r := m.selectedRecord()
 		if r == nil {
 			return m, nil
+		}
+		// Sprite animation takes priority over audio for multi-frame sprites.
+		if r.Type == lbx.RecordLBX {
+			hdr, err := lbx.ParseSpriteHeader(r.Data)
+			if err == nil && hdr.FrameCount > 1 {
+				return m.toggleAnimation(r)
+			}
 		}
 		if r.Type != lbx.RecordVOC && r.Type != lbx.RecordWAV && r.Type != lbx.RecordXMI {
 			m.statusMsg = "not an audio record"
@@ -325,7 +351,11 @@ func (m AppModel) View() string {
 	var previewStr string
 	if r != nil {
 		pal := m.paletteForRecord(r.Index)
-		previewStr = renderPreview(r, pal, rightW, contentH, m.previewCache)
+		animFrame := -1
+		if m.animPlaying && m.animRecIdx == r.Index {
+			animFrame = m.animFrame
+		}
+		previewStr = renderPreview(r, pal, rightW, contentH, m.previewCache, m.animFrames, animFrame)
 	}
 	rightStyle := lipgloss.NewStyle().Width(rightW).Height(contentH).
 		BorderLeft(true).BorderStyle(lipgloss.NormalBorder()).PaddingLeft(1)
@@ -334,7 +364,7 @@ func (m AppModel) View() string {
 	body := lipgloss.JoinHorizontal(lipgloss.Top, left, right)
 
 	// Help bar.
-	help := "↑↓ navigate   space play   x extract   c convert SVG   esc/ctrl+c quit"
+	help := "↑↓ navigate   space play/animate   x extract   c convert SVG   esc/ctrl+c quit"
 	if m.statusMsg != "" {
 		help = m.statusMsg + "   |   " + help
 	}
@@ -408,6 +438,43 @@ func (m *AppModel) stopPlayback() {
 		os.Remove(m.playTempFile)
 		m.playTempFile = ""
 	}
+}
+
+func (m AppModel) toggleAnimation(r *lbx.Record) (tea.Model, tea.Cmd) {
+	// Stop animation if already playing this record.
+	if m.animPlaying && m.animRecIdx == r.Index {
+		m.animPlaying = false
+		m.animFrames = nil
+		m.animFrame = 0
+		m.statusMsg = "animation stopped"
+		return m, nil
+	}
+
+	pal := m.paletteForRecord(r.Index)
+	frames, err := lbx.DecodeFrames(r.Data, pal)
+	if err != nil {
+		m.statusMsg = fmt.Sprintf("decode error: %v", err)
+		return m, nil
+	}
+	hdr, _ := lbx.ParseSpriteHeader(r.Data)
+
+	// FrameDelay is in game ticks (~1/24 s each); clamp to a sane range.
+	delay := time.Duration(hdr.FrameDelay) * (time.Second / 24)
+	if delay < 50*time.Millisecond {
+		delay = 100 * time.Millisecond
+	}
+
+	m.animFrames = frames
+	m.animFrame = 0
+	m.animPlaying = true
+	m.animDelay = delay
+	m.animRecIdx = r.Index
+	m.statusMsg = fmt.Sprintf("animating %d frames @ %v/frame", len(frames), delay)
+	return m, animTickCmd(delay)
+}
+
+func animTickCmd(d time.Duration) tea.Cmd {
+	return tea.Tick(d, func(time.Time) tea.Msg { return animTickMsg{} })
 }
 
 // waitForSound returns a tea.Cmd that waits for the audio process to exit.

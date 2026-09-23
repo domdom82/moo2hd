@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"image"
 	"image/color"
 	"strings"
 	"unicode"
@@ -13,8 +14,13 @@ const textPrintableThreshold = 0.85
 const textSampleSize = 512
 
 // renderPreview returns a string representation of r's contents for display in the preview pane.
-// previewCache is keyed by record index to avoid re-decoding on every render tick.
-func renderPreview(r *lbx.Record, palette color.Palette, cols, rows int, cache map[int]string) string {
+// animFrames and animFrame are non-nil/>=0 when an animation is actively playing; in that case
+// the cache is bypassed for the animated record so each frame is rendered fresh.
+func renderPreview(r *lbx.Record, palette color.Palette, cols, rows int, cache map[int]string, animFrames []image.Image, animFrame int) string {
+	// Bypass cache for animated records so each tick shows the new frame.
+	if animFrame >= 0 && len(animFrames) > animFrame {
+		return computePreviewWithFrame(r, palette, cols, rows, animFrames, animFrame)
+	}
 	if cached, ok := cache[r.Index]; ok {
 		return cached
 	}
@@ -24,6 +30,10 @@ func renderPreview(r *lbx.Record, palette color.Palette, cols, rows int, cache m
 }
 
 func computePreview(r *lbx.Record, palette color.Palette, cols, rows int) string {
+	return computePreviewWithFrame(r, palette, cols, rows, nil, -1)
+}
+
+func computePreviewWithFrame(r *lbx.Record, palette color.Palette, cols, rows int, animFrames []image.Image, animFrame int) string {
 	switch r.Type {
 	case lbx.RecordVOC, lbx.RecordWAV:
 		return fmt.Sprintf("[Audio — %d bytes]\n\nPress space to play.", len(r.Data))
@@ -32,7 +42,7 @@ func computePreview(r *lbx.Record, palette color.Palette, cols, rows int) string
 	case lbx.RecordSMK:
 		return fmt.Sprintf("[Smacker video — %d bytes]\n\nPlayback not supported.", len(r.Data))
 	case lbx.RecordLBX:
-		return renderLBX(r, palette, cols, rows)
+		return renderLBX(r, palette, cols, rows, animFrames, animFrame)
 	default:
 		if isText(r.Data) {
 			return renderText(r.Data)
@@ -45,7 +55,7 @@ func computePreview(r *lbx.Record, palette color.Palette, cols, rows int) string
 	}
 }
 
-func renderLBX(r *lbx.Record, palette color.Palette, cols, rows int) string {
+func renderLBX(r *lbx.Record, palette color.Palette, cols, rows int, animFrames []image.Image, animFrame int) string {
 	// Check for text content before attempting sprite decode — text records have
 	// type RecordLBX but their first bytes will satisfy ParseSpriteHeader with
 	// garbage dimensions, causing a misleading decode error.
@@ -66,19 +76,32 @@ func renderLBX(r *lbx.Record, palette color.Palette, cols, rows int) string {
 		return hexDump(r.Data, bpl)
 	}
 
-	frames, err := lbx.DecodeFrames(r.Data, palette)
-	if err != nil {
-		return fmt.Sprintf("[Sprite %dx%d, %d frames]\n\nDecode error: %v\n\nIf palette is missing, pass --assets <dir>.",
-			hdr.Width, hdr.Height, hdr.FrameCount, err)
+	// Use the provided animation frame if available; otherwise decode frame 0.
+	var frame image.Image
+	if animFrame >= 0 && len(animFrames) > animFrame {
+		frame = animFrames[animFrame]
+	} else {
+		frames, err := lbx.DecodeFrames(r.Data, palette)
+		if err != nil {
+			return fmt.Sprintf("[Sprite %dx%d, %d frames]\n\nDecode error: %v\n\nIf palette is missing, pass --assets <dir>.",
+				hdr.Width, hdr.Height, hdr.FrameCount, err)
+		}
+		frame = frames[0]
 	}
 
-	header := fmt.Sprintf("[Sprite %dx%d, %d frame(s)]\n\n", hdr.Width, hdr.Height, hdr.FrameCount)
+	playing := ""
+	if animFrame >= 0 {
+		playing = fmt.Sprintf(" — frame %d/%d", animFrame+1, hdr.FrameCount)
+	} else if hdr.FrameCount > 1 {
+		playing = " — press space to animate"
+	}
+	header := fmt.Sprintf("[Sprite %dx%d, %d frame(s)%s]\n\n", hdr.Width, hdr.Height, hdr.FrameCount, playing)
 	// Reserve rows used by the header text (2 lines + blank line).
 	imgRows := rows - 3
 	if imgRows < 1 {
 		imgRows = 1
 	}
-	return header + imageToANSI(frames[0], cols, imgRows)
+	return header + imageToANSI(frame, cols, imgRows)
 }
 
 func renderText(data []byte) string {
