@@ -12,29 +12,36 @@ import (
 	"github.com/domdom82/moo2hd/internal/lbx"
 )
 
+const (
+	minDelayMs uint16 = 150 // minimum frame delay in milliseconds
+)
+
 // starSpriteKey indexes the per-zoom sprite atlas.
 type starSpriteKey struct {
 	star string
 	tier ZoomTier
 }
 
-// starFrames holds the decoded SDL textures for one (star, tier) combination.
-// Multi-frame sprites have len > 1; single-frame sprites have exactly 1 entry.
-type starFrames []*sdl.Texture
+// starSprite holds the decoded SDL textures and the per-frame delay for one
+// (star, tier) combination. Multi-frame sprites have len(textures) > 1.
+type starSprite struct {
+	textures     []*sdl.Texture
+	frameDelayMs float32 // milliseconds between frames, from SpriteHeader.FrameDelay
+}
 
 // starAnimState tracks the live animation state for one system.
 type starAnimState struct {
-	frame      int     // current frame index
-	elapsed    float32 // seconds since last frame advance
-	frameTime  float32 // seconds per frame (from FrameDelay)
-	frameCount int     // total frames in the sprite
-	playing    bool
+	frame        int     // current frame index
+	elapsedMs    float32 // accumulated time since last frame advance (milliseconds)
+	frameDelayMs float32 // milliseconds per frame
+	frameCount   int     // total frames in the sprite
+	playing      bool
 }
 
 // StarSpriteManager loads star sprite art from BUFFER0.LBX and drives the
 // timed random-twinkle scheduler. One instance is shared across all draw calls.
 type StarSpriteManager struct {
-	sprites   map[starSpriteKey]starFrames // pre-decoded textures per (star, tier)
+	sprites   map[starSpriteKey]starSprite // pre-decoded textures per (star, tier)
 	animState map[galaxy.SystemID]*starAnimState
 
 	g *galaxy.Galaxy // needed to look up star types for the scheduler
@@ -59,7 +66,7 @@ func NewStarSpriteManager(
 	seed uint64,
 ) *StarSpriteManager {
 	sm := &StarSpriteManager{
-		sprites:    make(map[starSpriteKey]starFrames),
+		sprites:    make(map[starSpriteKey]starSprite),
 		animState:  make(map[galaxy.SystemID]*starAnimState),
 		g:          g,
 		galaxySize: galaxySize,
@@ -121,11 +128,16 @@ func NewStarSpriteManager(
 			if err != nil {
 				continue
 			}
-			frames, err := lbx.DecodeFrames(arc.Records[ref.Record].Data, palette)
+			recordData := arc.Records[ref.Record].Data
+			hdr, err := lbx.ParseSpriteHeader(recordData)
+			if err != nil {
+				continue
+			}
+			frames, err := lbx.DecodeFrames(recordData, palette)
 			if err != nil || len(frames) == 0 {
 				continue
 			}
-			textures := make(starFrames, len(frames))
+			textures := make([]*sdl.Texture, len(frames))
 			ok := true
 			for i, f := range frames {
 				tex, err := imageToTexture(renderer, f)
@@ -143,7 +155,10 @@ func NewStarSpriteManager(
 				}
 				continue
 			}
-			sm.sprites[starSpriteKey{star, tier}] = textures
+			sm.sprites[starSpriteKey{star, tier}] = starSprite{
+				textures:     textures,
+				frameDelayMs: float32(max(hdr.FrameDelay, minDelayMs)),
+			}
 		}
 	}
 
@@ -164,14 +179,50 @@ func openLBX(assetsDir, name string) ([]byte, error) {
 
 // Update advances the twinkle scheduler and all active star animations by dt seconds.
 func (sm *StarSpriteManager) Update(dt float32) {
+	if sm.timing != nil && sm.timing.AnimType == "loop" {
+		sm.updateLoop(dt)
+		return
+	}
+	sm.updateRandom(dt)
+}
+
+// updateLoop runs every star's animation continuously, wrapping at the last frame.
+func (sm *StarSpriteManager) updateLoop(dt float32) {
+	dtMs := dt * 1000.0
+	for _, id := range sm.systemIDs {
+		sys := sm.g.System(id)
+		sp := sm.sprites[starSpriteKey{string(sys.Star), ZoomClose}]
+		if len(sp.textures) <= 1 {
+			continue
+		}
+		st, ok := sm.animState[id]
+		if !ok {
+			st = &starAnimState{
+				frameDelayMs: sp.frameDelayMs,
+				frameCount:   len(sp.textures),
+				playing:      true,
+			}
+			sm.animState[id] = st
+		}
+		st.elapsedMs += dtMs
+		if st.elapsedMs >= st.frameDelayMs {
+			st.elapsedMs -= st.frameDelayMs
+			st.frame = (st.frame + 1) % st.frameCount
+		}
+	}
+}
+
+// updateRandom runs the sporadic twinkle scheduler (one-shot per trigger).
+func (sm *StarSpriteManager) updateRandom(dt float32) {
+	dtMs := dt * 1000
 	// Advance active animations.
 	for id, st := range sm.animState {
 		if !st.playing {
 			continue
 		}
-		st.elapsed += dt
-		if st.elapsed >= st.frameTime {
-			st.elapsed -= st.frameTime
+		st.elapsedMs += dtMs
+		if st.elapsedMs >= st.frameDelayMs {
+			st.elapsedMs -= st.frameDelayMs
 			st.frame++
 		}
 		// Stop when we've shown all frames once (one-shot twinkle).
@@ -180,9 +231,10 @@ func (sm *StarSpriteManager) Update(dt float32) {
 		}
 	}
 
-	if sm.timing == nil || len(sm.systemIDs) == 0 {
+	if sm.timing == nil || sm.timing.RandomOpt == nil || len(sm.systemIDs) == 0 {
 		return
 	}
+	opt := sm.timing.RandomOpt
 
 	// Twinkle scheduler.
 	sm.nextTrigger -= dt
@@ -191,9 +243,9 @@ func (sm *StarSpriteManager) Update(dt float32) {
 	}
 
 	// Pick how many stars to twinkle this batch.
-	count := sm.timing.CountMin
-	if sm.timing.CountMax > sm.timing.CountMin {
-		count += sm.rng.IntN(sm.timing.CountMax - sm.timing.CountMin + 1)
+	count := opt.CountMin
+	if opt.CountMax > opt.CountMin {
+		count += sm.rng.IntN(opt.CountMax - opt.CountMin + 1)
 	}
 
 	// Select random systems (skip any that are already animating).
@@ -209,16 +261,14 @@ func (sm *StarSpriteManager) Update(dt float32) {
 		}
 		sys := sm.g.System(id)
 		// Use ZoomClose frames for the animation (representative frame count).
-		frames := sm.sprites[starSpriteKey{string(sys.Star), ZoomClose}]
-		if len(frames) <= 1 {
+		sp := sm.sprites[starSpriteKey{string(sys.Star), ZoomClose}]
+		if len(sp.textures) <= 1 {
 			continue // no multi-frame sprite; skip
 		}
 		sm.animState[id] = &starAnimState{
-			frame:      0,
-			elapsed:    0,
-			frameTime:  1.0 / 24.0,
-			frameCount: len(frames),
-			playing:    true,
+			frameDelayMs: sp.frameDelayMs,
+			frameCount:   len(sp.textures),
+			playing:      true,
 		}
 		triggered++
 	}
@@ -228,12 +278,13 @@ func (sm *StarSpriteManager) Update(dt float32) {
 
 // resetTrigger picks a new random delay in [IntervalMinS, IntervalMaxS].
 func (sm *StarSpriteManager) resetTrigger() {
-	if sm.timing == nil {
+	if sm.timing == nil || sm.timing.RandomOpt == nil {
 		sm.nextTrigger = 60
 		return
 	}
-	span := sm.timing.IntervalMaxS - sm.timing.IntervalMinS
-	sm.nextTrigger = float32(sm.timing.IntervalMinS + sm.rng.Float64()*span)
+	opt := sm.timing.RandomOpt
+	span := opt.IntervalMaxS - opt.IntervalMinS
+	sm.nextTrigger = float32(opt.IntervalMinS + sm.rng.Float64()*span)
 }
 
 // DrawStar renders the star for the given system at screen position (sx, sy).
@@ -250,20 +301,20 @@ func (sm *StarSpriteManager) DrawStar(
 		return false
 	}
 	key := starSpriteKey{string(sys.Star), tier}
-	frames, ok := sm.sprites[key]
-	if !ok || len(frames) == 0 {
+	sp, ok := sm.sprites[key]
+	if !ok || len(sp.textures) == 0 {
 		return false
 	}
 
 	frame := 0
 	if st, active := sm.animState[sys.ID]; active && st.playing {
 		frame = st.frame
-		if frame >= len(frames) {
-			frame = len(frames) - 1
+		if frame >= len(sp.textures) {
+			frame = len(sp.textures) - 1
 		}
 	}
 
-	tex := frames[frame]
+	tex := sp.textures[frame]
 	if tex == nil {
 		return false
 	}
@@ -285,8 +336,8 @@ func (sm *StarSpriteManager) Close() {
 	if sm == nil {
 		return
 	}
-	for k, frames := range sm.sprites {
-		for _, tex := range frames {
+	for k, sp := range sm.sprites {
+		for _, tex := range sp.textures {
 			if tex != nil {
 				tex.Destroy()
 			}

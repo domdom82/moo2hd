@@ -44,32 +44,37 @@ star_sprites:
     mid:    { lbx: BUFFER0.LBX, record: 185 }
     far:    { lbx: BUFFER0.LBX, record: 184 }
 
-# Star twinkle animation timing per galaxy size.
-# count_min/count_max: how many stars may twinkle simultaneously.
-# interval_min_s/interval_max_s: seconds between triggering the next twinkle batch.
+# Star animation timing per galaxy size.
+# anim_type: "random" — sporadic twinkle batches; options in random_opt.
+#            "loop"   — every star animates continuously; no extra options.
 star_anim:
   - galaxy_size: small
-    count_min: 1
-    count_max: 2
-    interval_min_s: 90
-    interval_max_s: 240
+    anim_type: random
+    random_opt:
+      count_min: 1
+      count_max: 2
+      interval_min_s: 90
+      interval_max_s: 240
   - galaxy_size: medium
-    count_min: 1
-    count_max: 2
-    interval_min_s: 60
-    interval_max_s: 180
+    anim_type: random
+    random_opt:
+      count_min: 1
+      count_max: 2
+      interval_min_s: 60
+      interval_max_s: 180
   - galaxy_size: large
-    count_min: 1
-    count_max: 2
-    interval_min_s: 60
-    interval_max_s: 180
+    anim_type: random
+    random_opt:
+      count_min: 1
+      count_max: 2
+      interval_min_s: 60
+      interval_max_s: 180
   - galaxy_size: cluster
-    count_min: 2
-    count_max: 3
-    interval_min_s: 45
-    interval_max_s: 120
+    anim_type: random
+    random_opt:
+      count_min: 2
+      count_max: 3
+      interval_min_s: 45
+      interval_max_s: 120
   - galaxy_size: huge
-    count_min: 10
-    count_max: 20
-    interval_min_s: 30
-    interval_max_s: 60
+    anim_type: loop

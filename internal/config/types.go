@@ -17,16 +17,21 @@ type StarSpriteEntry struct {
 	Far    LBXSpriteRef `yaml:"far"`    // ZoomFar
 }
 
-// StarAnimTiming configures how often random star twinkle animations fire for
-// a given galaxy size. CountMin/CountMax is the number of stars to animate
-// simultaneously; IntervalMinS/IntervalMaxS is the gap between animation
-// triggers in seconds.
+// StarAnimRandomOpt holds the timing parameters for the "random" anim type.
+type StarAnimRandomOpt struct {
+	CountMin     int     `yaml:"count_min"`      // min simultaneous twinkling stars
+	CountMax     int     `yaml:"count_max"`      // max simultaneous twinkling stars
+	IntervalMinS float64 `yaml:"interval_min_s"` // shortest delay between triggers (seconds)
+	IntervalMaxS float64 `yaml:"interval_max_s"` // longest delay between triggers (seconds)
+}
+
+// StarAnimTiming configures the star animation behaviour for a given galaxy size.
+// AnimType is either "random" (sporadic twinkle scheduler, options in RandomOpt)
+// or "loop" (every star animates continuously, no extra options needed).
 type StarAnimTiming struct {
-	GalaxySize    string  `yaml:"galaxy_size"`     // matches galaxy.GalaxySize values
-	CountMin      int     `yaml:"count_min"`       // min simultaneous twinkling stars
-	CountMax      int     `yaml:"count_max"`       // max simultaneous twinkling stars
-	IntervalMinS  float64 `yaml:"interval_min_s"`  // shortest delay between triggers (seconds)
-	IntervalMaxS  float64 `yaml:"interval_max_s"`  // longest delay between triggers (seconds)
+	GalaxySize string             `yaml:"galaxy_size"` // matches galaxy.GalaxySize values
+	AnimType   string             `yaml:"anim_type"`   // "random" or "loop"
+	RandomOpt  *StarAnimRandomOpt `yaml:"random_opt,omitempty"`
 }
 type LBXPaletteRef struct {
 	LBX    string `yaml:"lbx"`    // e.g. "FONTS.LBX"

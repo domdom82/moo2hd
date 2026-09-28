@@ -458,8 +458,8 @@ func (m AppModel) toggleAnimation(r *lbx.Record) (tea.Model, tea.Cmd) {
 	}
 	hdr, _ := lbx.ParseSpriteHeader(r.Data)
 
-	// FrameDelay is in game ticks (~1/24 s each); clamp to a sane range.
-	delay := time.Duration(hdr.FrameDelay) * (time.Second / 24)
+	// FrameDelay is in milliseconds; clamp to a sane minimum.
+	delay := time.Duration(hdr.FrameDelay) * time.Millisecond
 	if delay < 50*time.Millisecond {
 		delay = 100 * time.Millisecond
 	}
