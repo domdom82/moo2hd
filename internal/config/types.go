@@ -17,7 +17,25 @@ type StarSpriteEntry struct {
 	Far    LBXSpriteRef `yaml:"far"`    // ZoomFar
 }
 
-// StarAnimRandomOpt holds the timing parameters for the "random" anim type.
+// PlanetSpriteVariants holds the LBX sprite reference for each planet size.
+// A zero-value LBXSpriteRef (empty LBX string) means "no sprite configured".
+// GasGiant planets only use the Huge variant.
+type PlanetSpriteVariants struct {
+	Tiny   LBXSpriteRef `yaml:"tiny,omitempty"`
+	Small  LBXSpriteRef `yaml:"small,omitempty"`
+	Medium LBXSpriteRef `yaml:"medium,omitempty"`
+	Large  LBXSpriteRef `yaml:"large,omitempty"`
+	Huge   LBXSpriteRef `yaml:"huge,omitempty"`
+}
+
+// PlanetSpriteEntry maps one planet class to its size-variant LBX sprites.
+// All planet sprites loop continuously (no twinkle scheduler).
+type PlanetSpriteEntry struct {
+	Class string              `yaml:"class"` // matches config.PlanetClass values
+	Sizes PlanetSpriteVariants `yaml:"sizes"`
+}
+
+
 type StarAnimRandomOpt struct {
 	CountMin     int     `yaml:"count_min"`      // min simultaneous twinkling stars
 	CountMax     int     `yaml:"count_max"`      // max simultaneous twinkling stars
@@ -86,7 +104,6 @@ const (
 	PlanetRadiated PlanetClass = "radiated"
 	PlanetToxic    PlanetClass = "toxic"
 	PlanetGaia     PlanetClass = "gaia"
-	PlanetInferno  PlanetClass = "inferno"
 	PlanetNone     PlanetClass = "none" // gas giant / uninhabitable
 )
 

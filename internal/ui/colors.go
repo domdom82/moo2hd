@@ -84,8 +84,6 @@ func PlanetColor(class string) sdl.FColor {
 		return sdl.FColor{R: 0.6, G: 0.9, B: 0.3, A: 1.0}
 	case "toxic":
 		return sdl.FColor{R: 0.5, G: 0.2, B: 0.6, A: 1.0}
-	case "inferno":
-		return sdl.FColor{R: 1.0, G: 0.3, B: 0.0, A: 1.0}
 	default:
 		return sdl.FColor{R: 0.4, G: 0.4, B: 0.4, A: 1.0}
 	}

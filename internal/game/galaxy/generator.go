@@ -309,7 +309,7 @@ func (g *Generator) randomSize() SystemSize {
 
 var planetClasses = []string{
 	"terran", "ocean", "arid", "desert", "tundra", "swamp",
-	"volcanic", "barren", "radiated", "toxic", "inferno", "none",
+	"volcanic", "barren", "radiated", "toxic", "none",
 }
 
 var richnesses = []string{"ultra-poor", "poor", "abundant", "rich", "ultra-rich"}

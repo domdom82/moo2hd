@@ -79,15 +79,6 @@ planets:
     richness: rich
     gravity: high
 
-  - id: inferno
-    class: inferno
-    max_pop: 5
-    food_mod: 0.0
-    prod_mod: 1.3
-    research_mod: 1.0
-    richness: poor
-    gravity: high
-
   - id: barren
     class: barren
     max_pop: 5

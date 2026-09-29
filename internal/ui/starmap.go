@@ -38,6 +38,7 @@ type StarMap struct {
 	bg      *BackgroundManager
 	nebulas *NebulaManager
 	stars   *StarSpriteManager
+	planets *PlanetSpriteManager
 
 	// focusedSystem is the system shown in ZoomSystem view; -1 when none.
 	focusedSystem galaxy.SystemID
@@ -63,7 +64,7 @@ type StarMap struct {
 }
 
 // NewStarMap creates a StarMap for the given galaxy.
-func NewStarMap(g *galaxy.Galaxy, cam Camera, font *FontManager, bg *BackgroundManager, nebulas *NebulaManager, stars *StarSpriteManager) *StarMap {
+func NewStarMap(g *galaxy.Galaxy, cam Camera, font *FontManager, bg *BackgroundManager, nebulas *NebulaManager, stars *StarSpriteManager, planets *PlanetSpriteManager) *StarMap {
 	return &StarMap{
 		g:               g,
 		cam:             cam,
@@ -71,6 +72,7 @@ func NewStarMap(g *galaxy.Galaxy, cam Camera, font *FontManager, bg *BackgroundM
 		bg:              bg,
 		nebulas:         nebulas,
 		stars:           stars,
+		planets:         planets,
 		focusedSystem:   -1,
 		planetScreenPos: make(map[galaxy.PlanetID][2]float32),
 	}
@@ -101,6 +103,7 @@ func (sm *StarMap) Bind(ih *InputHandler) {
 func (sm *StarMap) Update(dt float32) {
 	sm.updatePanToSystem(dt)
 	sm.stars.Update(dt)
+	sm.planets.Update(dt)
 }
 
 func (sm *StarMap) updatePanToSystem(dt float32) {
@@ -515,10 +518,12 @@ func (sm *StarMap) drawSystem(r *sdl.Renderer) {
 		px := cx + rx*float32(math.Cos(float64(angle)))
 		py := cy + ry*float32(math.Sin(float64(angle)))
 		pRadius := sysPlanetBaseRadius + float32(p.Size-1)*sysPlanetRadiusPerSize
-		col := PlanetColor(p.Class)
-		verts := buildCircleVertices(px, py, pRadius, col)
-		r.SetDrawBlendMode(sdl.BLENDMODE_NONE)
-		r.RenderGeometry(nil, verts, circleIndices[:])
+		if !sm.planets.DrawPlanet(r, p, px, py, pRadius*2) {
+			col := PlanetColor(p.Class)
+			verts := buildCircleVertices(px, py, pRadius, col)
+			r.SetDrawBlendMode(sdl.BLENDMODE_NONE)
+			r.RenderGeometry(nil, verts, circleIndices[:])
+		}
 		sm.planetScreenPos[pid] = [2]float32{px, py}
 	}
 

@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	minDelayMs uint16 = 150 // minimum frame delay in milliseconds
+	minDelayMs uint16 = 100 // minimum frame delay in milliseconds
 )
 
 // starSpriteKey indexes the per-zoom sprite atlas.

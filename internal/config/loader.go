@@ -20,9 +20,10 @@ type rawConfig struct {
 	Buildings   []Building         `yaml:"buildings,omitempty"`
 	Monsters    []Monster          `yaml:"monsters,omitempty"`
 	Components  []Component        `yaml:"components,omitempty"`
-	LBXPalettes []LBXPaletteEntry  `yaml:"lbx_palettes,omitempty"`
-	StarSprites []StarSpriteEntry  `yaml:"star_sprites,omitempty"`
-	StarAnim    []StarAnimTiming   `yaml:"star_anim,omitempty"`
+	LBXPalettes   []LBXPaletteEntry  `yaml:"lbx_palettes,omitempty"`
+	StarSprites   []StarSpriteEntry  `yaml:"star_sprites,omitempty"`
+	StarAnim      []StarAnimTiming   `yaml:"star_anim,omitempty"`
+	PlanetSprites []PlanetSpriteEntry `yaml:"planet_sprites,omitempty"`
 }
 
 // Registry is the read-only view of fully-merged game configuration.
@@ -35,9 +36,10 @@ type Registry struct {
 	buildings   map[string]*Building
 	monsters    map[string]*Monster
 	components  map[string]*Component
-	lbxPalettes map[string]*LBXPaletteEntry // keyed by id
-	starSprites map[string]*StarSpriteEntry  // keyed by star type
-	starAnim    map[string]*StarAnimTiming   // keyed by galaxy_size
+	lbxPalettes   map[string]*LBXPaletteEntry  // keyed by id
+	starSprites   map[string]*StarSpriteEntry   // keyed by star type
+	starAnim      map[string]*StarAnimTiming    // keyed by galaxy_size
+	planetSprites map[string]*PlanetSpriteEntry // keyed by planet class
 }
 
 // Race returns the race with the given id, or an error if not found.
@@ -165,6 +167,12 @@ func (r *Registry) StarAnimFor(galaxySize string) *StarAnimTiming {
 	return r.starAnim[galaxySize]
 }
 
+// PlanetSprite returns the sprite mapping for the given planet class, or nil if
+// none is configured. The class argument should be a config.PlanetClass string value.
+func (r *Registry) PlanetSprite(class string) *PlanetSpriteEntry {
+	return r.planetSprites[class]
+}
+
 // Techs returns all technologies sorted by id.
 func (r *Registry) Techs() []*Technology {
 	out := make([]*Technology, 0, len(r.techs))
@@ -265,9 +273,10 @@ func mergeInto(dst, src *rawConfig) {
 	dst.Buildings   = mergeByID(dst.Buildings, src.Buildings, func(b Building) string { return b.ID })
 	dst.Monsters    = mergeByID(dst.Monsters, src.Monsters, func(m Monster) string { return m.ID })
 	dst.Components  = mergeByID(dst.Components, src.Components, func(c Component) string { return c.ID })
-	dst.LBXPalettes = mergeByID(dst.LBXPalettes, src.LBXPalettes, func(e LBXPaletteEntry) string { return e.ID })
-	dst.StarSprites = mergeByID(dst.StarSprites, src.StarSprites, func(e StarSpriteEntry) string { return e.Star })
-	dst.StarAnim    = mergeByID(dst.StarAnim, src.StarAnim, func(e StarAnimTiming) string { return e.GalaxySize })
+	dst.LBXPalettes   = mergeByID(dst.LBXPalettes, src.LBXPalettes, func(e LBXPaletteEntry) string { return e.ID })
+	dst.StarSprites   = mergeByID(dst.StarSprites, src.StarSprites, func(e StarSpriteEntry) string { return e.Star })
+	dst.StarAnim      = mergeByID(dst.StarAnim, src.StarAnim, func(e StarAnimTiming) string { return e.GalaxySize })
+	dst.PlanetSprites = mergeByID(dst.PlanetSprites, src.PlanetSprites, func(e PlanetSpriteEntry) string { return e.Class })
 }
 
 func mergeByID[T any](dst, src []T, id func(T) string) []T {
@@ -298,9 +307,10 @@ func buildRegistry(raw *rawConfig) *Registry {
 		buildings:   make(map[string]*Building, len(raw.Buildings)),
 		monsters:    make(map[string]*Monster, len(raw.Monsters)),
 		components:  make(map[string]*Component, len(raw.Components)),
-		lbxPalettes: make(map[string]*LBXPaletteEntry, len(raw.LBXPalettes)),
-		starSprites: make(map[string]*StarSpriteEntry, len(raw.StarSprites)),
-		starAnim:    make(map[string]*StarAnimTiming, len(raw.StarAnim)),
+		lbxPalettes:   make(map[string]*LBXPaletteEntry, len(raw.LBXPalettes)),
+		starSprites:   make(map[string]*StarSpriteEntry, len(raw.StarSprites)),
+		starAnim:      make(map[string]*StarAnimTiming, len(raw.StarAnim)),
+		planetSprites: make(map[string]*PlanetSpriteEntry, len(raw.PlanetSprites)),
 	}
 	for i := range raw.Races {
 		v := raw.Races[i]
@@ -345,6 +355,10 @@ func buildRegistry(raw *rawConfig) *Registry {
 	for i := range raw.StarAnim {
 		v := raw.StarAnim[i]
 		r.starAnim[v.GalaxySize] = &v
+	}
+	for i := range raw.PlanetSprites {
+		v := raw.PlanetSprites[i]
+		r.planetSprites[v.Class] = &v
 	}
 	return r
 }

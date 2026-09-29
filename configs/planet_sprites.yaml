@@ -1,0 +1,99 @@
+# Planet sprite LBX mappings per planet class and size variant.
+# Each planet class has five size variants: tiny, small, medium, large, huge.
+# The special class "gas_giant" (uninhabitable) only uses the huge variant.
+# All planet animations loop continuously — there is no twinkle scheduler.
+#
+# A zero/missing LBX value means "no sprite configured"; the renderer falls back
+# to a coloured circle.
+planet_sprites:
+  - class: terran
+    sizes:
+      tiny:   { lbx: BUFFER0.LBX, record: 132 }
+      small:  { lbx: BUFFER0.LBX, record: 133 }
+      medium: { lbx: BUFFER0.LBX, record: 134 }
+      large:  { lbx: BUFFER0.LBX, record: 135 }
+      huge:   { lbx: BUFFER0.LBX, record: 136 }
+
+  - class: tundra
+    sizes:
+      tiny:   { lbx: BUFFER0.LBX, record: 112 }
+      small:  { lbx: BUFFER0.LBX, record: 113 }
+      medium: { lbx: BUFFER0.LBX, record: 114 }
+      large:  { lbx: BUFFER0.LBX, record: 115 }
+      huge:   { lbx: BUFFER0.LBX, record: 116 }
+
+  - class: arid
+    sizes:
+      tiny:   { lbx: BUFFER0.LBX, record: 122 }
+      small:  { lbx: BUFFER0.LBX, record: 123 }
+      medium: { lbx: BUFFER0.LBX, record: 124 }
+      large:  { lbx: BUFFER0.LBX, record: 125 }
+      huge:   { lbx: BUFFER0.LBX, record: 126 }
+
+  - class: desert
+    sizes:
+      tiny:   { lbx: BUFFER0.LBX, record: 127 }
+      small:  { lbx: BUFFER0.LBX, record: 128 }
+      medium: { lbx: BUFFER0.LBX, record: 129 }
+      large:  { lbx: BUFFER0.LBX, record: 130 }
+      huge:   { lbx: BUFFER0.LBX, record: 131 }
+
+  - class: ocean
+    sizes:
+      tiny:   { lbx: BUFFER0.LBX, record: 117 }
+      small:  { lbx: BUFFER0.LBX, record: 118 }
+      medium: { lbx: BUFFER0.LBX, record: 119 }
+      large:  { lbx: BUFFER0.LBX, record: 120 }
+      huge:   { lbx: BUFFER0.LBX, record: 121 }
+
+  - class: swamp
+    sizes:
+      tiny:   { lbx: BUFFER0.LBX, record: 107 }
+      small:  { lbx: BUFFER0.LBX, record: 108 }
+      medium: { lbx: BUFFER0.LBX, record: 109 }
+      large:  { lbx: BUFFER0.LBX, record: 110 }
+      huge:   { lbx: BUFFER0.LBX, record: 111 }
+
+  - class: volcanic
+    sizes:
+      tiny:   { lbx: BUFFER0.LBX, record: 97 }
+      small:  { lbx: BUFFER0.LBX, record: 98 }
+      medium: { lbx: BUFFER0.LBX, record: 99 }
+      large:  { lbx: BUFFER0.LBX, record: 100 }
+      huge:   { lbx: BUFFER0.LBX, record: 101 }
+
+  - class: barren
+    sizes:
+      tiny:   { lbx: BUFFER0.LBX, record: 102 }
+      small:  { lbx: BUFFER0.LBX, record: 103 }
+      medium: { lbx: BUFFER0.LBX, record: 104 }
+      large:  { lbx: BUFFER0.LBX, record: 105 }
+      huge:   { lbx: BUFFER0.LBX, record: 106 }
+
+  - class: radiated
+    sizes:
+      tiny:   { lbx: BUFFER0.LBX, record: 143 }
+      small:  { lbx: BUFFER0.LBX, record: 144 }
+      medium: { lbx: BUFFER0.LBX, record: 145 }
+      large:  { lbx: BUFFER0.LBX, record: 146 }
+      huge:   { lbx: BUFFER0.LBX, record: 147 }
+
+  - class: toxic
+    sizes:
+      tiny:   { lbx: BUFFER0.LBX, record: 92 }
+      small:  { lbx: BUFFER0.LBX, record: 93 }
+      medium: { lbx: BUFFER0.LBX, record: 94 }
+      large:  { lbx: BUFFER0.LBX, record: 95 }
+      huge:   { lbx: BUFFER0.LBX, record: 96 }
+
+  - class: gaia
+    sizes:
+      tiny:   { lbx: BUFFER0.LBX, record: 137 }
+      small:  { lbx: BUFFER0.LBX, record: 138 }
+      medium: { lbx: BUFFER0.LBX, record: 139 }
+      large:  { lbx: BUFFER0.LBX, record: 140 }
+      huge:   { lbx: BUFFER0.LBX, record: 141 }
+
+  - class: none
+    sizes:
+      huge:   { lbx: BUFFER0.LBX, record: 142 }

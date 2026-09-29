@@ -100,7 +100,7 @@ var validGovernments = map[string]bool{
 var validPlanetClasses = map[PlanetClass]bool{
 	PlanetTerran: true, PlanetOcean: true, PlanetArid: true, PlanetDesert: true,
 	PlanetTundra: true, PlanetSwamp: true, PlanetVolcanic: true, PlanetBarren: true,
-	PlanetRadiated: true, PlanetToxic: true, PlanetGaia: true, PlanetInferno: true,
+	PlanetRadiated: true, PlanetToxic: true, PlanetGaia: true,
 	PlanetNone: true,
 }
 
