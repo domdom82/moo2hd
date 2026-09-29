@@ -505,7 +505,9 @@ var systemNames = []string{
 	"Spock", "McCoy", "Scotty", "Uhura", "Chekov", "Sulu", "La Forge", "Dax", "Kira", "Quark",
 	"Nog", "Bashir", "Odo", "Weyoun", "Garak", "Martok",
 	"Cook", "Drake", "Halsey", "Hopper", "Kirkland", "Miller", "Nye", "Sagan", "Tyson", "Watson", "Goodall",
-	"Magellan", "Columbus", "Vespucci", "Cabot", "Balboa", "Pizarro", "Cortez",
+	"Magellan", "Columbus", "Vespucci", "Cabot", "Balboa", "Pizarro", "Cortez", "Weyland", "Yutani", "Ripley",
+	"Bishop", "Newt", "Hudson", "Vasquez", "Hicks", "Apone", "Gorman", "Crowe", "Frost", "Brennan", "Spunkmeyer",
+	"Tyrell", "Anderson",
 }
 
 // Prior, Posterior, and other suffixes are used to distinguish multiple systems in the same star cluster or binary system.

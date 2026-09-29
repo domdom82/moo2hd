@@ -24,11 +24,11 @@ const (
 )
 
 var sizeParams = map[GalaxySize]galaxySizeParams{
-	GalaxySizeSmall:   {StarCount: 280, Width: 7084, Height: 5600},
-	GalaxySizeMedium:  {StarCount: 504, Width: 10626, Height: 8400},
-	GalaxySizeLarge:   {StarCount: 756, Width: 14168, Height: 11200},
-	GalaxySizeCluster: {StarCount: 1000, Width: 14168, Height: 11200},
-	GalaxySizeHuge:    {StarCount: 1000, Width: 21252, Height: 16800},
+	GalaxySizeSmall:   {StarCount: 280, Width: 5060, Height: 4000},
+	GalaxySizeMedium:  {StarCount: 504, Width: 7590, Height: 6000},
+	GalaxySizeLarge:   {StarCount: 756, Width: 10120, Height: 8000},
+	GalaxySizeCluster: {StarCount: 1000, Width: 10120, Height: 8000},
+	GalaxySizeHuge:    {StarCount: 1000, Width: 15180, Height: 12000},
 }
 
 // SystemID is a typed index into Galaxy.Systems.
