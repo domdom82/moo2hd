@@ -53,6 +53,11 @@ type StarMap struct {
 	// every drawSystem call so hit-testing can find the right planet on click.
 	planetScreenPos map[galaxy.PlanetID][2]float32
 
+	// Tooltip state: which planet is hovered and current cursor position.
+	hoveredPlanet galaxy.PlanetID
+	tooltipX      float32
+	tooltipY      float32
+
 	// Colony screen state.
 	activeColony  *ColonyScreen
 	colonyManager *colony.Manager
@@ -75,6 +80,7 @@ func NewStarMap(g *galaxy.Galaxy, cam Camera, font *FontManager, bg *BackgroundM
 		planets:         planets,
 		focusedSystem:   -1,
 		planetScreenPos: make(map[galaxy.PlanetID][2]float32),
+		hoveredPlanet:   -1,
 	}
 }
 
@@ -85,7 +91,7 @@ func (sm *StarMap) Camera() *Camera {
 }
 
 // Bind attaches InputHandler callbacks so StarMap can respond to star click,
-// scroll-into-system, and planet click gestures. Call once after both sm and
+// scroll-into-system, and planet click/hover gestures. Call once after both sm and
 // ih are created.
 func (sm *StarMap) Bind(ih *InputHandler) {
 	ih.FindSystemAtScreen = sm.findSystemAtScreen
@@ -94,9 +100,18 @@ func (sm *StarMap) Bind(ih *InputHandler) {
 		sm.focusedSystem = -1
 		sm.panActive = false
 		sm.zoomToMax = false
+		sm.hoveredPlanet = -1
 	}
 	ih.FindPlanetAtScreen = sm.findPlanetAtScreen
 	ih.OnPlanetClick = sm.handlePlanetClick
+	ih.OnPlanetHover = func(pid galaxy.PlanetID, x, y float32) {
+		sm.hoveredPlanet = pid
+		sm.tooltipX = x
+		sm.tooltipY = y
+	}
+	ih.OnPlanetHoverEnd = func() {
+		sm.hoveredPlanet = -1
+	}
 }
 
 // Update advances per-frame animations (pan toward system). Call once per frame.
@@ -307,6 +322,8 @@ func (sm *StarMap) Draw(r *sdl.Renderer) error {
 		sm.drawSystem(r)
 	}
 
+	sm.drawTooltip(r)
+
 	return r.Present()
 }
 
@@ -488,6 +505,10 @@ func (sm *StarMap) drawSystem(r *sdl.Renderer) {
 		return
 	}
 	sys := sm.g.System(sm.focusedSystem)
+
+	// Clear stale hit positions from any previously visited system so hover
+	// detection only fires for planets belonging to the current system.
+	clear(sm.planetScreenPos)
 	cx := sm.cam.ScreenW / 2
 	cy := sm.cam.ScreenH / 2
 
@@ -552,4 +573,105 @@ func drawEllipse(r *sdl.Renderer, cx, cy, rx, ry float32, col sdl.FColor) {
 func planetAngle(pid galaxy.PlanetID) float32 {
 	h := uint32(pid)*2654435761 + 0x9e3779b9
 	return float32(h%10000) / 10000.0 * 2 * math.Pi
+}
+
+// capitalize upper-cases the first byte of s and returns the result.
+func capitalize(s string) string {
+	if s == "" {
+		return s
+	}
+	if s[0] >= 'a' && s[0] <= 'z' {
+		return string(s[0]-32) + s[1:]
+	}
+	return s
+}
+
+// slotRoman converts a 1-based orbit slot to its Roman numeral string.
+func slotRoman(slot int) string {
+	switch slot {
+	case 1:
+		return "I"
+	case 2:
+		return "II"
+	case 3:
+		return "III"
+	case 4:
+		return "IV"
+	case 5:
+		return "V"
+	}
+	return ""
+}
+
+// planetSizeLabel returns the display name for a planet size (1–5).
+func planetSizeLabel(size int) string {
+	switch size {
+	case 1:
+		return "Tiny"
+	case 2:
+		return "Small"
+	case 3:
+		return "Medium"
+	case 4:
+		return "Large"
+	case 5:
+		return "Huge"
+	}
+	return ""
+}
+
+// buildPlanetTooltip assembles the tooltip lines for the given planet.
+func (sm *StarMap) buildPlanetTooltip(pid galaxy.PlanetID) *Tooltip {
+	p := sm.g.Planet(pid)
+	sys := sm.g.System(p.SystemID)
+
+	var lines []string
+
+	// Line 1: "Draconis II" or "Draconis II (Elerian)"
+	nameLine := sys.Name + " " + slotRoman(p.Slot)
+	var col *colony.Colony
+	if sm.colonyManager != nil {
+		col = sm.colonyManager.ColonyForPlanet(int(pid))
+	}
+	if col != nil {
+		// Capitalise the race name for display.
+		race := col.OwnerRace
+		if len(race) > 0 {
+			race = capitalize(race)
+		}
+		nameLine += " (" + race + ")"
+	}
+	lines = append(lines, nameLine)
+
+	// Line 2: "Medium, Terran"
+	lines = append(lines, planetSizeLabel(p.Size)+", "+capitalize(p.Class))
+
+	// Line 3: population or max pop
+	if col != nil {
+		cur := int(col.Population)
+		lines = append(lines, fmt.Sprintf("%d / %d pop", cur, p.MaxPop))
+	} else {
+		lines = append(lines, fmt.Sprintf("%d max pop", p.MaxPop))
+	}
+
+	// Line 4: richness
+	lines = append(lines, capitalize(p.Richness))
+
+	// Orbital installations.
+	if col != nil && colony.HasBuilding(col, "star_base") {
+		lines = append(lines, "")
+		lines = append(lines, "Star Base")
+	}
+
+	return &Tooltip{Lines: lines}
+}
+
+// drawTooltip renders the planet tooltip when a planet is hovered in the
+// system view.
+func (sm *StarMap) drawTooltip(r *sdl.Renderer) {
+	if sm.hoveredPlanet < 0 {
+		return
+	}
+	tt := sm.buildPlanetTooltip(sm.hoveredPlanet)
+	tt.Draw(r, sm.font, sm.tooltipX, sm.tooltipY, sm.cam.ScreenW, sm.cam.ScreenH)
 }

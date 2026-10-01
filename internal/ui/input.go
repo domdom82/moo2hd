@@ -45,6 +45,10 @@ type InputHandler struct {
 	mouseDownX, mouseDownY float32
 	mouseDownSet           bool
 
+	// MouseX/Y track the current cursor position and are updated on every
+	// mouse-motion event (not only during drags).
+	MouseX, MouseY float32
+
 	// FindSystemAtScreen is set by StarMap. Returns the nearest system within
 	// radius screen-px of (sx, sy), or -1/false if none.
 	FindSystemAtScreen func(sx, sy, radius float32) (galaxy.SystemID, bool)
@@ -64,6 +68,14 @@ type InputHandler struct {
 	// OnPlanetClick is set by StarMap. Called when the player clicks a planet
 	// disc in the ZoomSystem view.
 	OnPlanetClick func(pid galaxy.PlanetID)
+
+	// OnPlanetHover is set by StarMap. Called when the cursor enters a planet
+	// disc in the ZoomSystem view; x, y are screen-space cursor coordinates.
+	OnPlanetHover func(pid galaxy.PlanetID, x, y float32)
+
+	// OnPlanetHoverEnd is set by StarMap. Called when the cursor leaves all
+	// planet discs in the ZoomSystem view.
+	OnPlanetHoverEnd func()
 }
 
 // NewInputHandler creates an InputHandler that mutates cam.
@@ -143,8 +155,9 @@ func (h *InputHandler) Handle(event *sdl.Event) error {
 		}
 
 	case sdl.EVENT_MOUSE_MOTION:
+		evt := event.MouseMotionEvent()
+		h.MouseX, h.MouseY = evt.X, evt.Y
 		if h.dragging {
-			evt := event.MouseMotionEvent()
 			h.cam.PanPx(-evt.Xrel, -evt.Yrel)
 			h.cam.Clamp(h.galaxyW, h.galaxyH)
 			const sampleHz = float32(60)
@@ -152,6 +165,9 @@ func (h *InputHandler) Handle(event *sdl.Event) error {
 			instVelY := -evt.Yrel * sampleHz
 			h.velX = h.velX*(1-velocitySmooth) + instVelX*velocitySmooth
 			h.velY = h.velY*(1-velocitySmooth) + instVelY*velocitySmooth
+		}
+		if h.cam.InSystem() {
+			h.tryPlanetHover(evt.X, evt.Y)
 		}
 
 	case sdl.EVENT_MOUSE_WHEEL:
@@ -252,6 +268,24 @@ func (h *InputHandler) tryPlanetClick(sx, sy float32) {
 	}
 	if pid, ok := h.FindPlanetAtScreen(sx, sy); ok {
 		h.OnPlanetClick(pid)
+	}
+}
+
+// tryPlanetHover fires OnPlanetHover/OnPlanetHoverEnd based on whether the
+// cursor is currently over a planet disc. Called on every mouse-motion event
+// while in ZoomSystem view.
+func (h *InputHandler) tryPlanetHover(sx, sy float32) {
+	if h.FindPlanetAtScreen == nil {
+		return
+	}
+	if pid, ok := h.FindPlanetAtScreen(sx, sy); ok {
+		if h.OnPlanetHover != nil {
+			h.OnPlanetHover(pid, sx, sy)
+		}
+	} else {
+		if h.OnPlanetHoverEnd != nil {
+			h.OnPlanetHoverEnd()
+		}
 	}
 }
 
