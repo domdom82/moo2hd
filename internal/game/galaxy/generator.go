@@ -263,14 +263,15 @@ func (g *Generator) generatePlanets(systems []System) []Planet {
 		for slot := 1; slot <= slots; slot++ {
 			pid := PlanetID(len(planets))
 			p := Planet{
-				ID:       pid,
-				SystemID: SystemID(i),
-				Slot:     slot,
-				Class:    g.randomPlanetClass(),
-				Richness: g.randomRichness(),
-				Gravity:  g.randomGravity(),
-				MaxPop:   g.rng.IntN(13) + 3, // 3–15
-				Size:     g.rng.IntN(5) + 1,  // 1–5
+				ID:        pid,
+				SystemID:  SystemID(i),
+				Slot:      slot,
+				Class:     g.randomPlanetClass(),
+				Richness:  g.randomRichness(),
+				Gravity:   g.randomGravity(),
+				MaxPop:    g.rng.IntN(13) + 3, // 3–15
+				Size:      g.rng.IntN(5) + 1,  // 1–5
+				BgVariant: g.rng.IntN(3),       // 0–2, fixed at generation
 			}
 			planets = append(planets, p)
 			systems[i].Planets = append(systems[i].Planets, pid)
@@ -309,7 +310,7 @@ func (g *Generator) randomSize() SystemSize {
 
 var planetClasses = []string{
 	"terran", "ocean", "arid", "desert", "tundra", "swamp",
-	"volcanic", "barren", "radiated", "toxic", "none",
+	"barren", "radiated", "toxic", "none",
 }
 
 var richnesses = []string{"ultra-poor", "poor", "abundant", "rich", "ultra-rich"}

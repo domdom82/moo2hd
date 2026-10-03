@@ -1,12 +1,19 @@
 # Planet sprite LBX mappings per planet class and size variant.
 # Each planet class has five size variants: tiny, small, medium, large, huge.
-# The special class "gas_giant" (uninhabitable) only uses the huge variant.
+# The special class "none" (uninhabitable gas giant) only uses the huge variant.
 # All planet animations loop continuously — there is no twinkle scheduler.
 #
 # A zero/missing LBX value means "no sprite configured"; the renderer falls back
 # to a coloured circle.
+#
+# background: array of up to 3 colony screen backdrop variants. The variant index
+# is chosen randomly at planet generation and stored per-planet so it is stable.
 planet_sprites:
   - class: terran
+    background:
+      - { lbx: PLANETS.LBX, record: 24 }
+      - { lbx: PLANETS.LBX, record: 25 }
+      - { lbx: PLANETS.LBX, record: 26 }
     sizes:
       tiny:   { lbx: BUFFER0.LBX, record: 132 }
       small:  { lbx: BUFFER0.LBX, record: 133 }
@@ -15,6 +22,10 @@ planet_sprites:
       huge:   { lbx: BUFFER0.LBX, record: 136 }
 
   - class: tundra
+    background:
+      - { lbx: PLANETS.LBX, record: 12 }
+      - { lbx: PLANETS.LBX, record: 13 }
+      - { lbx: PLANETS.LBX, record: 14 }
     sizes:
       tiny:   { lbx: BUFFER0.LBX, record: 112 }
       small:  { lbx: BUFFER0.LBX, record: 113 }
@@ -23,6 +34,10 @@ planet_sprites:
       huge:   { lbx: BUFFER0.LBX, record: 116 }
 
   - class: arid
+    background:
+      - { lbx: PLANETS.LBX, record: 21 }
+      - { lbx: PLANETS.LBX, record: 22 }
+      - { lbx: PLANETS.LBX, record: 23 }
     sizes:
       tiny:   { lbx: BUFFER0.LBX, record: 122 }
       small:  { lbx: BUFFER0.LBX, record: 123 }
@@ -31,6 +46,10 @@ planet_sprites:
       huge:   { lbx: BUFFER0.LBX, record: 126 }
 
   - class: desert
+    background:
+      - { lbx: PLANETS.LBX, record: 9 }
+      - { lbx: PLANETS.LBX, record: 10 }
+      - { lbx: PLANETS.LBX, record: 11 }
     sizes:
       tiny:   { lbx: BUFFER0.LBX, record: 127 }
       small:  { lbx: BUFFER0.LBX, record: 128 }
@@ -39,6 +58,10 @@ planet_sprites:
       huge:   { lbx: BUFFER0.LBX, record: 131 }
 
   - class: ocean
+    background:
+      - { lbx: PLANETS.LBX, record: 15 }
+      - { lbx: PLANETS.LBX, record: 16 }
+      - { lbx: PLANETS.LBX, record: 17 }
     sizes:
       tiny:   { lbx: BUFFER0.LBX, record: 117 }
       small:  { lbx: BUFFER0.LBX, record: 118 }
@@ -47,6 +70,10 @@ planet_sprites:
       huge:   { lbx: BUFFER0.LBX, record: 121 }
 
   - class: swamp
+    background:
+      - { lbx: PLANETS.LBX, record: 18 }
+      - { lbx: PLANETS.LBX, record: 19 }
+      - { lbx: PLANETS.LBX, record: 20 }
     sizes:
       tiny:   { lbx: BUFFER0.LBX, record: 107 }
       small:  { lbx: BUFFER0.LBX, record: 108 }
@@ -54,15 +81,11 @@ planet_sprites:
       large:  { lbx: BUFFER0.LBX, record: 110 }
       huge:   { lbx: BUFFER0.LBX, record: 111 }
 
-  - class: volcanic
-    sizes:
-      tiny:   { lbx: BUFFER0.LBX, record: 97 }
-      small:  { lbx: BUFFER0.LBX, record: 98 }
-      medium: { lbx: BUFFER0.LBX, record: 99 }
-      large:  { lbx: BUFFER0.LBX, record: 100 }
-      huge:   { lbx: BUFFER0.LBX, record: 101 }
-
   - class: barren
+    background:
+      - { lbx: PLANETS.LBX, record: 6 }
+      - { lbx: PLANETS.LBX, record: 7 }
+      - { lbx: PLANETS.LBX, record: 8 }
     sizes:
       tiny:   { lbx: BUFFER0.LBX, record: 102 }
       small:  { lbx: BUFFER0.LBX, record: 103 }
@@ -71,6 +94,10 @@ planet_sprites:
       huge:   { lbx: BUFFER0.LBX, record: 106 }
 
   - class: radiated
+    background:
+      - { lbx: PLANETS.LBX, record: 3 }
+      - { lbx: PLANETS.LBX, record: 4 }
+      - { lbx: PLANETS.LBX, record: 5 }
     sizes:
       tiny:   { lbx: BUFFER0.LBX, record: 143 }
       small:  { lbx: BUFFER0.LBX, record: 144 }
@@ -79,6 +106,10 @@ planet_sprites:
       huge:   { lbx: BUFFER0.LBX, record: 147 }
 
   - class: toxic
+    background:
+      - { lbx: PLANETS.LBX, record: 0 }
+      - { lbx: PLANETS.LBX, record: 1 }
+      - { lbx: PLANETS.LBX, record: 2 }
     sizes:
       tiny:   { lbx: BUFFER0.LBX, record: 92 }
       small:  { lbx: BUFFER0.LBX, record: 93 }
@@ -87,6 +118,10 @@ planet_sprites:
       huge:   { lbx: BUFFER0.LBX, record: 96 }
 
   - class: gaia
+    background:
+      - { lbx: PLANETS.LBX, record: 27 }
+      - { lbx: PLANETS.LBX, record: 28 }
+      - { lbx: PLANETS.LBX, record: 29 }
     sizes:
       tiny:   { lbx: BUFFER0.LBX, record: 137 }
       small:  { lbx: BUFFER0.LBX, record: 138 }
@@ -95,5 +130,7 @@ planet_sprites:
       huge:   { lbx: BUFFER0.LBX, record: 141 }
 
   - class: none
+    background:
+      - { lbx: PLANETS.LBX, record: 6 }
     sizes:
       huge:   { lbx: BUFFER0.LBX, record: 142 }

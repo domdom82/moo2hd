@@ -61,7 +61,7 @@ func NewPlanetSpriteManager(
 
 	planetClasses := []string{
 		"terran", "ocean", "arid", "desert", "tundra", "swamp",
-		"volcanic", "barren", "radiated", "toxic", "gaia",
+		"barren", "radiated", "toxic", "gaia",
 		"none", // gas giant
 	}
 
@@ -220,3 +220,130 @@ func (pm *PlanetSpriteManager) Close() {
 		delete(pm.sprites, k)
 	}
 }
+
+// ColonyBgManager loads and renders the per-planet-class colony screen background
+// images. Each class may have up to 3 variants; the variant index is fixed per
+// planet at generation time and passed to DrawBackground.
+type ColonyBgManager struct {
+	textures map[string][]*sdl.Texture // keyed by planet class; indexed by variant
+}
+
+// NewColonyBgManager loads all configured colony background images from assetsDir.
+// Missing or undecodable records are skipped silently.
+func NewColonyBgManager(
+	renderer *sdl.Renderer,
+	assetsDir string,
+	reg *config.Registry,
+) *ColonyBgManager {
+	cm := &ColonyBgManager{
+		textures: make(map[string][]*sdl.Texture),
+	}
+	if reg == nil {
+		return cm
+	}
+
+	archives := make(map[string]*lbx.Archive)
+	openArc := func(name string) *lbx.Archive {
+		if arc, ok := archives[name]; ok {
+			return arc
+		}
+		data, err := openLBX(assetsDir, name)
+		if err != nil {
+			return nil
+		}
+		arc, err := lbx.Parse(data)
+		if err != nil {
+			return nil
+		}
+		archives[name] = arc
+		return arc
+	}
+
+	planetClasses := []string{
+		"terran", "ocean", "arid", "desert", "tundra", "swamp",
+		"barren", "radiated", "toxic", "gaia", "none",
+	}
+	for _, class := range planetClasses {
+		entry := reg.PlanetSprite(class)
+		if entry == nil || len(entry.Background) == 0 {
+			continue
+		}
+		variants := make([]*sdl.Texture, 0, len(entry.Background))
+		for _, ref := range entry.Background {
+			if ref.LBX == "" {
+				variants = append(variants, nil)
+				continue
+			}
+			arc := openArc(ref.LBX)
+			if arc == nil || ref.Record < 0 || ref.Record >= len(arc.Records) {
+				variants = append(variants, nil)
+				continue
+			}
+			palRefs := reg.LBXPaletteFor(ref.LBX, ref.Record)
+			palette, err := lbx.BuildPalette(assetsDir, palRefs)
+			if err != nil {
+				variants = append(variants, nil)
+				continue
+			}
+			frames, err := lbx.DecodeFrames(arc.Records[ref.Record].Data, palette)
+			if err != nil || len(frames) == 0 {
+				variants = append(variants, nil)
+				continue
+			}
+			tex, err := imageToTexture(renderer, frames[0])
+			if err != nil {
+				variants = append(variants, nil)
+				continue
+			}
+			variants = append(variants, tex)
+		}
+		cm.textures[class] = variants
+	}
+
+	return cm
+}
+
+// DrawBackground renders the colony background for planetClass stretched to fill
+// the full renderer output. variant selects which background image to use (0-based,
+// clamped to the available range). Returns false when no background is configured
+// for the class, so the caller can fall back to a solid colour fill.
+func (cm *ColonyBgManager) DrawBackground(r *sdl.Renderer, planetClass string, variant int) bool {
+	if cm == nil {
+		return false
+	}
+	variants, ok := cm.textures[planetClass]
+	if !ok || len(variants) == 0 {
+		return false
+	}
+	if variant < 0 || variant >= len(variants) {
+		variant = 0
+	}
+	tex := variants[variant]
+	if tex == nil {
+		return false
+	}
+	w, h, err := r.RenderOutputSize()
+	if err != nil {
+		return false
+	}
+	dst := sdl.FRect{X: 0, Y: 0, W: float32(w), H: float32(h)}
+	r.SetDrawBlendMode(sdl.BLENDMODE_NONE)
+	_ = r.RenderTexture(tex, nil, &dst)
+	return true
+}
+
+// Close releases all SDL textures held by the manager.
+func (cm *ColonyBgManager) Close() {
+	if cm == nil {
+		return
+	}
+	for k, variants := range cm.textures {
+		for _, tex := range variants {
+			if tex != nil {
+				tex.Destroy()
+			}
+		}
+		delete(cm.textures, k)
+	}
+}
+

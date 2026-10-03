@@ -76,8 +76,6 @@ func PlanetColor(class string) sdl.FColor {
 		return sdl.FColor{R: 0.6, G: 0.7, B: 0.8, A: 1.0}
 	case "swamp":
 		return sdl.FColor{R: 0.3, G: 0.5, B: 0.2, A: 1.0}
-	case "volcanic":
-		return sdl.FColor{R: 0.8, G: 0.2, B: 0.0, A: 1.0}
 	case "barren":
 		return sdl.FColor{R: 0.5, G: 0.5, B: 0.5, A: 1.0}
 	case "radiated":

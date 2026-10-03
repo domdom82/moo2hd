@@ -113,7 +113,7 @@ races:
     name: Silicoid
     description: Silicon-based creatures that can colonize any world without food.
     government: dictatorship
-    home_world: volcanic
+    home_world: barren
     pick_total: 10
     traits:
       - lithovore

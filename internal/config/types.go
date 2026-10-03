@@ -28,11 +28,13 @@ type PlanetSpriteVariants struct {
 	Huge   LBXSpriteRef `yaml:"huge,omitempty"`
 }
 
-// PlanetSpriteEntry maps one planet class to its size-variant LBX sprites.
+// PlanetSpriteEntry maps one planet class to its size-variant LBX sprites
+// and the colony screen background images.
 // All planet sprites loop continuously (no twinkle scheduler).
 type PlanetSpriteEntry struct {
-	Class string              `yaml:"class"` // matches config.PlanetClass values
-	Sizes PlanetSpriteVariants `yaml:"sizes"`
+	Class      string               `yaml:"class"`      // matches config.PlanetClass values
+	Sizes      PlanetSpriteVariants `yaml:"sizes"`
+	Background []LBXSpriteRef       `yaml:"background"` // colony screen backdrop variants (up to 3)
 }
 
 
@@ -99,7 +101,6 @@ const (
 	PlanetDesert   PlanetClass = "desert"
 	PlanetTundra   PlanetClass = "tundra"
 	PlanetSwamp    PlanetClass = "swamp"
-	PlanetVolcanic PlanetClass = "volcanic"
 	PlanetBarren   PlanetClass = "barren"
 	PlanetRadiated PlanetClass = "radiated"
 	PlanetToxic    PlanetClass = "toxic"

@@ -104,7 +104,10 @@ func main() {
 	ps := ui.NewPlanetSpriteManager(renderer, "assets/", reg)
 	defer ps.Close()
 
-	sm := ui.NewStarMap(g, cam, font, bg, nm, ss, ps)
+	cb := ui.NewColonyBgManager(renderer, "assets/", reg)
+	defer cb.Close()
+
+	sm := ui.NewStarMap(g, cam, font, bg, nm, ss, ps, cb)
 	sm.SetColonyData(mgr, localRace)
 	ih := ui.NewInputHandler(sm.Camera(), glxOpt.Width, glxOpt.Height)
 	sm.Bind(ih)

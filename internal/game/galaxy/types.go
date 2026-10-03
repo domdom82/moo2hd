@@ -118,14 +118,15 @@ func (n *Nebula) LBXRecord() int {
 
 // Planet is a single planet body stored in Galaxy.Planets.
 type Planet struct {
-	ID       PlanetID
-	SystemID SystemID
-	Slot     int    // 1–5 position within the system
-	Class    string // config.PlanetClass value
-	Richness string // ultra-poor … ultra-rich
-	Gravity  string // low / normal / high
-	MaxPop   int
-	Size     int // 1–5
+	ID        PlanetID
+	SystemID  SystemID
+	Slot      int    // 1–5 position within the system
+	Class     string // config.PlanetClass value
+	Richness  string // ultra-poor … ultra-rich
+	Gravity   string // low / normal / high
+	MaxPop    int
+	Size      int // 1–5
+	BgVariant int // index into the PlanetSpriteEntry.Background slice, chosen at generation
 }
 
 // Lane is one directed edge in the travel-lane graph.

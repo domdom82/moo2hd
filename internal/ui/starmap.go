@@ -38,7 +38,9 @@ type StarMap struct {
 	bg      *BackgroundManager
 	nebulas *NebulaManager
 	stars   *StarSpriteManager
-	planets *PlanetSpriteManager
+	planets   *PlanetSpriteManager
+	colonyBg  *ColonyBgManager
+	fader     *ScreenFader
 
 	// focusedSystem is the system shown in ZoomSystem view; -1 when none.
 	focusedSystem galaxy.SystemID
@@ -69,7 +71,7 @@ type StarMap struct {
 }
 
 // NewStarMap creates a StarMap for the given galaxy.
-func NewStarMap(g *galaxy.Galaxy, cam Camera, font *FontManager, bg *BackgroundManager, nebulas *NebulaManager, stars *StarSpriteManager, planets *PlanetSpriteManager) *StarMap {
+func NewStarMap(g *galaxy.Galaxy, cam Camera, font *FontManager, bg *BackgroundManager, nebulas *NebulaManager, stars *StarSpriteManager, planets *PlanetSpriteManager, colonyBg *ColonyBgManager) *StarMap {
 	return &StarMap{
 		g:               g,
 		cam:             cam,
@@ -78,6 +80,8 @@ func NewStarMap(g *galaxy.Galaxy, cam Camera, font *FontManager, bg *BackgroundM
 		nebulas:         nebulas,
 		stars:           stars,
 		planets:         planets,
+		colonyBg:        colonyBg,
+		fader:           NewScreenFader(0.3),
 		focusedSystem:   -1,
 		planetScreenPos: make(map[galaxy.PlanetID][2]float32),
 		hoveredPlanet:   -1,
@@ -116,6 +120,7 @@ func (sm *StarMap) Bind(ih *InputHandler) {
 
 // Update advances per-frame animations (pan toward system). Call once per frame.
 func (sm *StarMap) Update(dt float32) {
+	sm.fader.Update(dt)
 	sm.updatePanToSystem(dt)
 	sm.stars.Update(dt)
 	sm.planets.Update(dt)
@@ -213,8 +218,8 @@ func (sm *StarMap) findPlanetAtScreen(sx, sy float32) (galaxy.PlanetID, bool) {
 	return best, best >= 0
 }
 
-// handlePlanetClick opens the colony screen if the clicked planet has a colony
-// owned by the local player; otherwise does nothing.
+// handlePlanetClick opens the colony screen for the clicked planet with a
+// fade-out → swap → fade-in transition.
 func (sm *StarMap) handlePlanetClick(pid galaxy.PlanetID) {
 	if sm.colonyManager == nil {
 		return
@@ -225,9 +230,15 @@ func (sm *StarMap) handlePlanetClick(pid galaxy.PlanetID) {
 	}
 	p := sm.g.Planet(pid)
 	sys := sm.g.System(p.SystemID)
-	cs := NewColonyScreen(c, p, sys, sm.font)
-	cs.OnClose = func() { sm.activeColony = nil }
-	sm.activeColony = cs
+	sm.fader.Start(func() {
+		cs := NewColonyScreen(c, p, sys, sm.font, sm.colonyBg)
+		cs.OnClose = func() {
+			sm.fader.Start(func() {
+				sm.activeColony = nil
+			})
+		}
+		sm.activeColony = cs
+	})
 }
 
 // SetColonyData provides the colony manager and local player race to StarMap
@@ -304,6 +315,7 @@ func (sm *StarMap) Draw(r *sdl.Renderer) error {
 		if err := sm.activeColony.Draw(r); err != nil {
 			return err
 		}
+		sm.fader.Draw(r)
 		return r.Present()
 	}
 
@@ -323,6 +335,7 @@ func (sm *StarMap) Draw(r *sdl.Renderer) error {
 	}
 
 	sm.drawTooltip(r)
+	sm.fader.Draw(r)
 
 	return r.Present()
 }

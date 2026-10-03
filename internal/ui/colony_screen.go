@@ -10,10 +10,10 @@ import (
 
 // Colony screen layout constants (1080p reference).
 const (
-	csMargin    float32 = 40.0
-	csLineH     float32 = 22.0
+	csMargin     float32 = 40.0
+	csLineH      float32 = 22.0
 	csSectionGap float32 = 12.0
-	csPanelAlpha uint8   = 220
+	csPanelAlpha uint8   = 180
 )
 
 // ColonyScreen is a full-screen overlay showing colony details and management.
@@ -22,14 +22,16 @@ type ColonyScreen struct {
 	planet *galaxy.Planet
 	sys    *galaxy.System
 	font   *FontManager
+	bg     *ColonyBgManager
 
 	// OnClose is called when the player dismisses the screen (Escape key).
 	OnClose func()
 }
 
 // NewColonyScreen creates a colony screen for the given colony.
-func NewColonyScreen(c *colony.Colony, p *galaxy.Planet, sys *galaxy.System, font *FontManager) *ColonyScreen {
-	return &ColonyScreen{col: c, planet: p, sys: sys, font: font}
+// bg may be nil; in that case a solid dark fill is used instead of a background image.
+func NewColonyScreen(c *colony.Colony, p *galaxy.Planet, sys *galaxy.System, font *FontManager, bg *ColonyBgManager) *ColonyScreen {
+	return &ColonyScreen{col: c, planet: p, sys: sys, font: font, bg: bg}
 }
 
 // Handle processes one SDL event. Returns sdl.EndLoop only when the
@@ -59,7 +61,14 @@ func (cs *ColonyScreen) Draw(r *sdl.Renderer) error {
 	fw := float32(w)
 	fh := float32(h)
 
-	// Semi-transparent dark panel covering the full screen.
+	// Background: LBX image for this planet class, or a solid dark fill.
+	if !cs.bg.DrawBackground(r, cs.planet.Class, cs.planet.BgVariant) {
+		r.SetDrawBlendMode(sdl.BLENDMODE_NONE)
+		r.SetDrawColor(10, 12, 20, 255)
+		r.RenderFillRect(&sdl.FRect{X: 0, Y: 0, W: fw, H: fh})
+	}
+
+	// Semi-transparent dark overlay to keep text legible over the background.
 	r.SetDrawBlendMode(sdl.BLENDMODE_BLEND)
 	r.SetDrawColor(10, 12, 20, csPanelAlpha)
 	r.RenderFillRect(&sdl.FRect{X: 0, Y: 0, W: fw, H: fh})

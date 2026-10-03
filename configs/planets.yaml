@@ -70,15 +70,6 @@ planets:
     richness: poor
     gravity: normal
 
-  - id: volcanic
-    class: volcanic
-    max_pop: 6
-    food_mod: 0.2
-    prod_mod: 1.5
-    research_mod: 1.0
-    richness: rich
-    gravity: high
-
   - id: barren
     class: barren
     max_pop: 5
