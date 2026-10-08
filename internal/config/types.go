@@ -1,9 +1,20 @@
 package config
 
 // LBXSpriteRef identifies a single sprite record within an LBX archive.
+// Scale is an optional render multiplier (1.0 = original size, 2.0 = double, etc.).
+// When omitted or 0 it defaults to 1.0.
 type LBXSpriteRef struct {
-	LBX    string `yaml:"lbx"`    // e.g. "BUFFER0.LBX"
-	Record int    `yaml:"record"` // zero-based record index
+	LBX    string  `yaml:"lbx"`              // e.g. "BUFFER0.LBX"
+	Record int     `yaml:"record"`           // zero-based record index
+	Scale  float64 `yaml:"scale,omitempty"`  // render scale factor; 0 or absent → 1.0
+}
+
+// EffectiveScale returns the scale factor, treating 0 as 1.0.
+func (r LBXSpriteRef) EffectiveScale() float32 {
+	if r.Scale <= 0 {
+		return 1.0
+	}
+	return float32(r.Scale)
 }
 
 // StarSpriteEntry maps one star type to the LBX sprite that should be used at

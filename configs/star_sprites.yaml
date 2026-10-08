@@ -11,38 +11,38 @@ star_sprites:
   - star: orange
     system: { lbx: BUFFER0.LBX, record: 160 }
     close:  { lbx: BUFFER0.LBX, record: 161 }
-    mid:    { lbx: BUFFER0.LBX, record: 161 }
-    far:    { lbx: BUFFER0.LBX, record: 160 }
+    mid:    { lbx: BUFFER0.LBX, record: 161, scale: 2.0 }
+    far:    { lbx: BUFFER0.LBX, record: 160, scale: 2.5 }
   - star: blue
     system: { lbx: BUFFER0.LBX, record: 148 }
     close:  { lbx: BUFFER0.LBX, record: 149 }
-    mid:    { lbx: BUFFER0.LBX, record: 149 }
-    far:    { lbx: BUFFER0.LBX, record: 148 }
+    mid:    { lbx: BUFFER0.LBX, record: 149, scale: 2.0 }
+    far:    { lbx: BUFFER0.LBX, record: 148, scale: 2.5 }
   - star: white
     system: { lbx: BUFFER0.LBX, record: 154 }
     close:  { lbx: BUFFER0.LBX, record: 155 }
-    mid:    { lbx: BUFFER0.LBX, record: 155 }
-    far:    { lbx: BUFFER0.LBX, record: 154 }
+    mid:    { lbx: BUFFER0.LBX, record: 155, scale: 2.0 }
+    far:    { lbx: BUFFER0.LBX, record: 154, scale: 2.5 }
   - star: yellow
     system: { lbx: BUFFER0.LBX, record: 178 }
     close:  { lbx: BUFFER0.LBX, record: 179 }
-    mid:    { lbx: BUFFER0.LBX, record: 179 }
-    far:    { lbx: BUFFER0.LBX, record: 178 }
+    mid:    { lbx: BUFFER0.LBX, record: 179, scale: 2.0 }
+    far:    { lbx: BUFFER0.LBX, record: 178, scale: 2.5 }
   - star: brown
     system: { lbx: BUFFER0.LBX, record: 166 }
     close:  { lbx: BUFFER0.LBX, record: 167 }
-    mid:    { lbx: BUFFER0.LBX, record: 167 }
-    far:    { lbx: BUFFER0.LBX, record: 166 }
+    mid:    { lbx: BUFFER0.LBX, record: 167, scale: 2.0 }
+    far:    { lbx: BUFFER0.LBX, record: 166, scale: 2.5 }
   - star: red
     system: { lbx: BUFFER0.LBX, record: 172 }
     close:  { lbx: BUFFER0.LBX, record: 173 }
-    mid:    { lbx: BUFFER0.LBX, record: 173 }
-    far:    { lbx: BUFFER0.LBX, record: 172 }
+    mid:    { lbx: BUFFER0.LBX, record: 173, scale: 2.0 }
+    far:    { lbx: BUFFER0.LBX, record: 172, scale: 2.5 }
   - star: black_hole
     system: { lbx: BUFFER0.LBX, record: 184 }
     close:  { lbx: BUFFER0.LBX, record: 185 }
-    mid:    { lbx: BUFFER0.LBX, record: 185 }
-    far:    { lbx: BUFFER0.LBX, record: 184 }
+    mid:    { lbx: BUFFER0.LBX, record: 185, scale: 2.0 }
+    far:    { lbx: BUFFER0.LBX, record: 184, scale: 2.5 }
 
 # Star animation timing per galaxy size.
 # anim_type: "random" — sporadic twinkle batches; options in random_opt.

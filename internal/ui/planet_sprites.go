@@ -137,6 +137,7 @@ func NewPlanetSpriteManager(
 			pm.sprites[planetSpriteKey{class, sz}] = starSprite{
 				textures:     textures,
 				frameDelayMs: float32(max(hdr.FrameDelay, minDelayMs)),
+				scale:        ref.EffectiveScale(),
 			}
 		}
 	}
@@ -194,12 +195,12 @@ func (pm *PlanetSpriteManager) DrawPlanet(
 		return false
 	}
 
-	half := displaySize / 2
+	half := displaySize * sp.scale / 2
 	dst := sdl.FRect{
 		X: px - half,
 		Y: py - half,
-		W: displaySize,
-		H: displaySize,
+		W: displaySize * sp.scale,
+		H: displaySize * sp.scale,
 	}
 	r.SetDrawBlendMode(sdl.BLENDMODE_BLEND)
 	_ = r.RenderTexture(tex, nil, &dst)

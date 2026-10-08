@@ -27,6 +27,7 @@ type starSpriteKey struct {
 type starSprite struct {
 	textures     []*sdl.Texture
 	frameDelayMs float32 // milliseconds between frames, from SpriteHeader.FrameDelay
+	scale        float32 // render scale factor from LBXSpriteRef.EffectiveScale()
 }
 
 // starAnimState tracks the live animation state for one system.
@@ -158,6 +159,7 @@ func NewStarSpriteManager(
 			sm.sprites[starSpriteKey{star, tier}] = starSprite{
 				textures:     textures,
 				frameDelayMs: float32(max(hdr.FrameDelay, minDelayMs)),
+				scale:        ref.EffectiveScale(),
 			}
 		}
 	}
@@ -319,12 +321,12 @@ func (sm *StarSpriteManager) DrawStar(
 		return false
 	}
 
-	half := displaySize / 2
+	half := displaySize * sp.scale / 2
 	dst := sdl.FRect{
 		X: sx - half,
 		Y: sy - half,
-		W: displaySize,
-		H: displaySize,
+		W: displaySize * sp.scale,
+		H: displaySize * sp.scale,
 	}
 	r.SetDrawBlendMode(sdl.BLENDMODE_BLEND)
 	_ = r.RenderTexture(tex, nil, &dst)
